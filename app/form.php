@@ -20,7 +20,7 @@
             if (($file = fopen($csvFile, 'a'))) {
                 fputcsv($file, $dataRow);
                 fclose($file);
-                $message = 'Даныне успешно сохранены';
+                $message = 'Данные успешно сохранены';
             }
             else {
                 $message = 'Ошибка при сохранении данных';
