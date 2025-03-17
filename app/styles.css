@@ -1,0 +1,27 @@
+/* Общие стили для ошибок */
+.error {
+    color: red;
+    font-size: 12px;
+    display: block;
+    margin-top: 5px;
+}
+
+/* Стилизация полей с ошибками */
+input:invalid {
+    border: 2px solid red;
+}
+
+/* Стилизация при фокусе */
+input:focus {
+    outline: 2px solid blue;
+}
+
+/* Ограничение длины номера телефона */
+.phone-format {
+    width: 180px;
+}
+
+/* Ограничение длины артикула */
+.article-format {
+    width: 120px;
+}
