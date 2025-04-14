@@ -7,6 +7,10 @@ const hasLetter = (str) => {
 }
 
 const fields = [
+    { id: "client_name", errorClass: "client_name_error", validate: (v) => v === "" || hasNumber(v), msg: "Укажите корректное ФИО клиента" },
+    { id: "courier_name", errorClass: "courier_name_error", validate: (v) => v === "" || hasNumber(v), msg: "Укажите корректное ФИО курьера" },
+    { id: "client_phone", errorClass: "client_phone_error", validate: (v) => v === "" || v.length < 17, msg: "Укажите корректный номер телефона" },
+    { id: "client_mail", errorClass: "email_error", validate: (v) => v === "" || !white_list_email_domains.includes(v.split("@")[1]), msg: "Укажите корректную эл. почту" },
     { id: "product", errorClass: "product_error", validate: (v) => v === "", msg: "Укажите корректное название товара"},
     { id: "price", errorClass: "product_price_error", validate: (v) => v === "" || v < 1, msg: "Укажите корректную стоимость товара" },
     { id: "article", errorClass: "article_error", validate: (v) => !/^[A-ZА-Я]{3}-\d{4}$/.test(v), msg: "Формат: 0000" },

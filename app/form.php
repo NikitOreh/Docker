@@ -14,6 +14,10 @@
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Получаем и обрабатываем данные
+        $client_name = trim($_POST['client_name'] ?? '');
+        $client_phone = str_replace($_POST['client_phone'] ?? '');
+        $client_mail = trim($_POST['client_mail'] ?? '');
+        $courier_name = trim($_POST['courier_name'] ?? '');
         $product = trim($_POST['product'] ?? '');
         $product_price = trim($_POST['price'] ?? '');
         $label = trim($_POST['label'] ?? '');
@@ -29,6 +33,22 @@
         $errors = [];
 
         // Валидация
+        if (empty($client_name) || strlen($client_name) > 100 || hasNumber($client_name)) {
+            $errors[] = 'Укажите корректное имя клиента';
+        }
+    
+        if (empty($client_phone) || strlen($client_phone) < 11) {
+            $errors[] = 'Укажите корректный номер телефона';
+        }
+    
+        if (empty($courier_name) || strlen($courier_name) > 100 || hasNumber($courier_name)) {
+            $errors[] = 'Укажите корректное имя курьера';
+        }
+    
+        if (empty($client_mail) || !isValidEmailDomain($client_mail)) {
+            $errors[] = "Укажите корректную почту";
+        }
+
         if (empty($product)) {
             $errors[] = 'Укажите название товара';
         }
@@ -74,6 +94,10 @@
         // Файл для сохранения данных
         $csvFile = 'data.csv';
         $dataRow = [
+            $client_name,
+            $client_phone,
+            $client_mail,
+            $courier_name,
             $product,
             $product_price,
             $label,
