@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Курьерская служба</h1>
+        <h1>Интеренет магазин</h1>
         <form action="form.php" method="POST">
             <div class="form-section">
                 <h3>Информация о клиенте</h3>
