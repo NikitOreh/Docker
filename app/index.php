@@ -3,14 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< Updated upstream
-    <title>Курьерская служба</title>
-    <link rel="stylesheet" href="style.css">
-=======
     <title>Форма заказа</title>
     <link rel="stylesheet" href="styles.css">
     <script defer src="index.js"></script> 
->>>>>>> Stashed changes
 </head>
 <body>
     <div class="container">
@@ -22,43 +17,63 @@
                     <label for="client_name">ФИО клиента*</label>
                     <input type="text" name="client_name" id="client_name" required maxlength=100>
                     <p class="client_name_error"></p>
-                </div>
-                <div class="form-group">
+
                     <label for="client_phone">Номер телефона клиента*</label>
                     <input type="tel" name="client_phone" id="client_phone" data-tel-input maxlength=18 required>
                     <p class="client_phone_error"></p>
-                </div>
-                <div class="form-group">
+                
                     <label for="client_mail">Почта клиента</label>
                     <input type="email" name="client_mail" id="client_mail" placeholder="some@some.some">
                     <p class="email_error"></p>
-                </div>
             </div>
 
             <div class="form-section">
                 <h3>Курьер</h3>
                 <div class="form-group">
-                    <label for="courier">ФИО курьера*</label>
-                    <input type="text" name="courier_name" id="courier_name" required maxlength=100>
-                    <p class="courier_name_error"></p>
+                    <label for="courier-select">Выберите курьера:</label>
+                    <select name="courier" id="courier-select">
+                        <option value="">-- Выберите курьера --</option>
+                        <?php foreach ($courier as $courier): ?>
+                            <option value="<?= htmlspecialchars($courier['courier_email']) ?>">
+                                <?= htmlspecialchars($courier['courier_fullname']) ?> 
+                                (тел: <?= htmlspecialchars($courier['courier_phone']) ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
-            </div>
-
-            <div class="form-section">
+           
                 <h3>Информация о товаре</h3>
-                <div class="form-group">
-                    <label for="product">Товар*</label>
-                    <input type="text" name="product" id="product" required>
-                    <p class="product_error"></p>
+                <div class="filter-section">
+                    <form method="get">
+                        <label for="category">Фильтр по категории:</label>
+                        <select name="category" id="category" onchange="this.form.submit()">
+                            <option value="all">Все категории</option>
+                            <?php foreach ($categories as $category): ?>
+                                <option value="<?= htmlspecialchars($category) ?>" 
+                                    <?= ($selectedCategory === $category) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($category) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label for="product_price">Стоимость товара*</label>
-                    <input type="number" name="product_price" id="product_price" required min="1">
-                    <p class="product_price_error"></p>
-                </div>
-            </div>
-
-            <div class="form-section">
+    
+    <form method="post">
+        <label for="product-select">Выберите товар:</label>
+        <select name="product" id="product-select" required>
+            <option value="">-- Выберите товар --</option>
+            <?php foreach ($products as $product): ?>
+                <option value="<?= htmlspecialchars($product['product_name']) ?>"
+                    data-price="<?= htmlspecialchars($product['product_price']) ?>"
+                    data-category="<?= htmlspecialchars($product['product_category']) ?>">
+                    <?= htmlspecialchars($product['product_name']) ?> 
+                    (<?= htmlspecialchars($product['product_category']) ?>)
+                    - <?= htmlspecialchars($product['product_price']) ?> руб.
+                </option>
+                <?php endforeach; ?>
+        </select>
+    </form>
+    
                 <h3>Адрес доставки</h3>
                 <div class="form-row">
                     <div class="form-group">
@@ -100,10 +115,7 @@
                     <label for="intercome_code">Код домофона</label>
                     <input type="text" name="intercome_code" id="intercome_code">
                 </div>
-            </div>
-
-<<<<<<< Updated upstream
-            <div class="form-section">
+        
                 <h3>Информация о доставке</h3>
                 <div class="form-row">
                     <div class="form-group">
@@ -115,9 +127,7 @@
                         <label for="delivery_price">Стоимость доставки*</label>
                         <input type="number" name="delivery_price" id="delivery_price" required min="1">
                         <p class="delivery_price_error"></p>
-                    </div>
-                </div>
-                <div class="form-group">
+               
                     <label for="delivery_type">Тип доставки*</label>
                     <select name="delivery_type" id="delivery_type" required>
                         <option value="">Выберите тип доставки</option>
@@ -133,28 +143,5 @@
     </div>
     <script src="phoneinput.js"></script>
     <script src="index.js"></script>
-=======
-        <label>Категория: <input type="text" id="category" name="category"></label>
-        <span class="category_error error"></span><br>
-
-        <label>Телефон: <input type="text" id="phone" name="phone" class="phone-format"></label>
-        <span class="phone_error error"></span><br>
-
-        <label>Улица: <input type="text" id="street" name="street"></label>
-        <span class="street_error error"></span><br>
-
-        <label>Дом: <input type="text" id="house" name="house" class="only-numbers"></label>
-        <span class="house_error error"></span><br>
-
-        <label>Квартира: <input type="text" id="apartment" name="apartment" class="only-numbers"></label>
-        <span class="apartment_error error"></span><br>
-
-        <label>Этаж: <input type="text" id="floor" name="floor" class="only-numbers"></label>
-        <span class="floor_error error"></span><br>
-
-        <button type="submit">Отправить</button>
-    </form>
-    
->>>>>>> Stashed changes
 </body>
 </html>

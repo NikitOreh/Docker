@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $apartment = trim($_POST['apartment'] ?? '');
     $floor = trim($_POST['floor'] ?? '');
     $intercom_code = trim($_POST['intercom_code'] ?? '');
-
+}
     $errors = [];
 
     if (empty($product)) {
@@ -63,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-<<<<<<< Updated upstream
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Получаем и обрабатываем данные
         $client_name = trim($_POST['client_name'] ?? '');
@@ -178,27 +177,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         echo $message . "\n";
 ?>
-=======
-    $csvFile = 'data.csv';
-    $dataRow = [
-        $product,
-        $price,
-        $label,
-        $category,
-        $street,
-        $house,
-        $entrance,
-        $apartment,
-        $floor,
-        $intercom_code,
-    ];
-
-    if (($file = fopen($csvFile, 'a'))) {
-        fputcsv($file, $dataRow);
-        fclose($file);
-        echo json_encode(["status" => "success", "message" => "Данные успешно сохранены"], JSON_UNESCAPED_UNICODE);
-    } else {
-        echo json_encode(["status" => "error", "message" => "Ошибка при сохранении данных"], JSON_UNESCAPED_UNICODE);
-    }
-}
->>>>>>> Stashed changes

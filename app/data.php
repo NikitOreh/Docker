@@ -6,9 +6,32 @@ $stmt = $pdo->query('
             delivery_number, client_fullname, courier_fullname, delivery_city, delivery_street, delivery_house, 
             delivery_entrance, delivery_apartment, delivery_floor, delivery_intercome_code, delivery_date, delivery_price, delivery_type 
         FROM delivery d join client cl on d.client_id = cl.client_id join courier cr on d.courier_id = cr.courier_id');
-$deliveries = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$delivery = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$stmt = $pdo->query('
+        SELECT client_fullname, client_phone, client_email FROM client ORDER BY client_fullname');
+$client = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$categoriesStmt = $pdo->query('SELECT DISTINCT product_category FROM product ORDER BY product_category');
+$categories = $categoriesStmt->fetchAll(PDO::FETCH_COLUMN);
+
+// Определяем выбранную категорию (если есть)
+$selectedCategory = $_GET['category'] ?? null;
+
+// Формируем SQL запрос в зависимости от выбранной категории
+$sql = 'SELECT product_name, product_category, product_label, product_price, product_type FROM product';
+if ($selectedCategory && $selectedCategory !== 'all') {
+    $sql .= ' WHERE product_category = :category';
+}
+$sql .= ' ORDER BY product_name';
+
+$stmt = $pdo->prepare($sql);
+if ($selectedCategory && $selectedCategory !== 'all') {
+    $stmt->bindParam(':category', $selectedCategory);
+}
+    
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
