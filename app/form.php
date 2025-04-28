@@ -14,9 +14,9 @@ function hasSpecial($str) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $product = trim($_POST['product'] ?? '');
-    $price = trim($_POST['price'] ?? '');
-    $label = trim($_POST['label'] ?? '');
-    $category = trim($_POST['category'] ?? '');
+    // $price = trim($_POST['price'] ?? '');
+    // $label = trim($_POST['label'] ?? '');
+    // $category = trim($_POST['category'] ?? '');
     $street = trim($_POST['street'] ?? '');
     $house = trim($_POST['house'] ?? '');
     $entrance = trim($_POST['entrance'] ?? '');
@@ -29,15 +29,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($product)) {
         array_push($errors, ['field' => 'product', 'message' => 'Укажите название товара']);
     }
-    if (empty($price) || !is_numeric($price) || $price < 1) {
-        array_push($errors, ['field' => 'price', 'message' => 'Укажите корректную цену товара']);
-    }
-    if (empty($label)) {
-        array_push($errors, ['field' => 'label', 'message' => 'Укажите метку товара']);
-    }
-    if (empty($category)) {
-        array_push($errors, ['field' => 'category', 'message' => 'Укажите категорию товара']);
-    }
+    // if (empty($price) || !is_numeric($price) || $price < 1) {
+    //     array_push($errors, ['field' => 'price', 'message' => 'Укажите корректную цену товара']);
+    // }
+    // if (empty($label)) {
+    //     array_push($errors, ['field' => 'label', 'message' => 'Укажите метку товара']);
+    // }
+    // if (empty($category)) {
+    //     array_push($errors, ['field' => 'category', 'message' => 'Укажите категорию товара']);
+    // }
 
     if (empty($street)) {
         array_push($errors, ['field' => 'street', 'message' => 'Укажите улицу']);
@@ -66,13 +66,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Получаем и обрабатываем данные
         $client_name = trim($_POST['client_name'] ?? '');
-        $client_phone = str_replace($_POST['client_phone'] ?? '');
+        $client_phone = trim($_POST['client_phone'] ?? '');
         $client_mail = trim($_POST['client_mail'] ?? '');
         $courier_name = trim($_POST['courier_name'] ?? '');
         $product = trim($_POST['product'] ?? '');
         $product_price = trim($_POST['price'] ?? '');
-        $label = trim($_POST['label'] ?? '');
-        $category = trim($_POST['category'] ?? '');
+        // $label = trim($_POST['label'] ?? '');
+        // $category = trim($_POST['category'] ?? '');
         $street = trim($_POST['street'] ?? '');
         $house = trim($_POST['house'] ?? '');
         $entrance = trim($_POST['entrance'] ?? '');
@@ -92,29 +92,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = 'Укажите корректный номер телефона';
         }
     
-        if (empty($courier_name) || strlen($courier_name) > 100 || hasNumber($courier_name)) {
-            $errors[] = 'Укажите корректное имя курьера';
-        }
+        // if (empty($courier_name) || strlen($courier_name) > 100 || hasNumber($courier_name)) {
+        //     $errors[] = 'Укажите корректное имя курьера';
+        // }
     
-        if (empty($client_mail) || !isValidEmailDomain($client_mail)) {
-            $errors[] = "Укажите корректную почту";
-        }
+        // if (empty($client_mail) || !isValidEmailDomain($client_mail)) {
+        //     $errors[] = "Укажите корректную почту";
+        // }
 
         if (empty($product)) {
             $errors[] = 'Укажите название товара';
         }
 
-        if (empty($product_price) || !is_numeric($product_price) || $product_price < 1) {
-            $errors[] = 'Укажите корректную цену товара';
-        }
+        // if (empty($product_price) || !is_numeric($product_price) || $product_price < 1) {
+        //     $errors[] = 'Укажите корректную цену товара';
+        // }
 
-        if (empty($label)) {
-            $errors[] = 'Укажите метку товара';
-        }
+        // if (empty($label)) {
+        //     $errors[] = 'Укажите метку товара';
+        // }
 
-        if (empty($category)) {
-            $errors[] = 'Укажите категорию товара';
-        }
+        // if (empty($category)) {
+        //     $errors[] = 'Укажите категорию товара';
+        // }
 
         if (empty($street)) {
             $errors[] = 'Укажите улицу';
@@ -151,8 +151,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $courier_name,
             $product,
             $product_price,
-            $label,
-            $category,
+            // $label,
+            // $category,
             $street,
             $house,
             $entrance,

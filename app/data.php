@@ -1,35 +1,15 @@
 <?php
 require 'db.php';
 
-$stmt = $pdo->query('
-        SELECT 
-            delivery_number, client_fullname, courier_fullname, delivery_city, delivery_street, delivery_house, 
-            delivery_entrance, delivery_apartment, delivery_floor, delivery_intercome_code, delivery_date, delivery_price, delivery_type 
-        FROM delivery d join client cl on d.client_id = cl.client_id join courier cr on d.courier_id = cr.courier_id');
+$stmt = $pdo->query('SELECT * FROM delivery ORDER BY delivery_number');
 $delivery = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$stmt = $pdo->query('
-        SELECT client_fullname, client_phone, client_email FROM client ORDER BY client_fullname');
-$client = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt = $pdo->query('SELECT * FROM courier ORDER BY courier_fullname');
+$courier = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$categoriesStmt = $pdo->query('SELECT DISTINCT product_category FROM product ORDER BY product_category');
-$categories = $categoriesStmt->fetchAll(PDO::FETCH_COLUMN);
+$stmt = $pdo->query('SELECT * FROM product ORDER BY product_category');
+$product = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Определяем выбранную категорию (если есть)
-$selectedCategory = $_GET['category'] ?? null;
-
-// Формируем SQL запрос в зависимости от выбранной категории
-$sql = 'SELECT product_name, product_category, product_label, product_price, product_type FROM product';
-if ($selectedCategory && $selectedCategory !== 'all') {
-    $sql .= ' WHERE product_category = :category';
-}
-$sql .= ' ORDER BY product_name';
-
-$stmt = $pdo->prepare($sql);
-if ($selectedCategory && $selectedCategory !== 'all') {
-    $stmt->bindParam(':category', $selectedCategory);
-}
-    
 ?>
 
 <!DOCTYPE html>
@@ -86,7 +66,54 @@ if ($selectedCategory && $selectedCategory !== 'all') {
 </head>
 
 <body>
-    <h2>Доставки</h2>
+    <h2>Заказы</h2>
+    <div class="form-section">
+                <!-- <h3>Курьер</h3>
+                <div class="form-group">
+                    <label for="courier-select">Выберите курьера:</label>
+                    <select name="courier" id="courier-select">
+                        <option value="">-- Выберите курьера --</option>
+                        <?php foreach ($courier as $c): ?>
+                            <option value="<?= htmlspecialchars($c['courier_fullname']) ?>">
+                                <?= htmlspecialchars($c['courier_fullname']) ?> 
+                                (тел: <?= htmlspecialchars($c['courier_phone']) ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <h3>Информация о товаре</h3>
+                 <div class="filter-section">
+                    <form method="get">
+                        <label for="category">Фильтр по категории:</label>
+                        <select name="category" id="category" onchange="this.form.submit()">
+                            <option value="all">Все категории</option>
+                            <?php foreach ($categories as $ca): ?>
+                                <option value="<?= htmlspecialchars($ca) ?>" 
+                                    <?= ($selectedCategory === $ca) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($ca) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </form>
+                </div> -->
+     
+    <!-- <form method="post">
+        <label for="product-select">Выберите товар:</label>
+        <select name="product" id="product-select" required>
+            <option value="">-- Выберите товар --</option>
+            <?php foreach ($product as $p): ?>
+                <option value="<?= htmlspecialchars($p['product_category']) ?>"
+                    data-price="<?= htmlspecialchars($p['product_price']) ?>"
+                    data-category="<?= htmlspecialchars($p['product_category']) ?>">
+                    <?= htmlspecialchars($p['product_name']) ?> 
+                    (<?= htmlspecialchars($p['product_category']) ?>)
+                    - <?= htmlspecialchars($p['product_price']) ?> руб.
+                </option>
+                <?php endforeach; ?>
+        </select>
+    </form>
+     -->
     <table>
         <tr>
             <th>Номер доставки</th>
@@ -103,21 +130,21 @@ if ($selectedCategory && $selectedCategory !== 'all') {
             <th>Стоимость доставки</th>
             <th>Тип доставки</th>
         </tr>
-        <?php foreach ($deliveries as $delivery): ?>
+        <?php foreach ($delivery as $d): ?>
             <tr>
-                <td><?= $delivery['delivery_number'] ?></td>
-                <td><?= $delivery['client_fullname'] ?></td>
-                <td><?= $delivery['courier_fullname'] ?></td>
-                <td><?= $delivery['delivery_city'] ?></td>
-                <td><?= $delivery['delivery_street'] ?></td>
-                <td><?= $delivery['delivery_house'] ?></td>
-                <td><?= empty($delivery['delivery_entrance']) ? "Не указан" : $delivery['delivery_entrance'] ?></td>
-                <td><?= empty($delivery['delivery_apartment']) ? "Не указан" : $delivery['delivery_apartment']  ?></td>
-                <td><?= empty($delivery['delivery_floor']) ? "Не указан" : $delivery['delivery_floor'] ?></td>
-                <td><?= empty($delivery['delivery_intercome_code']) ? "Не указан" : $delivery['delivery_intercome_code'] ?></td>
-                <td><?= $delivery['delivery_date'] ?></td>
-                <td><?= $delivery['delivery_price'] ?></td>
-                <td><?= $delivery['delivery_type'] ?></td>
+                <td><?= $d['delivery_number'] ?></td>
+                <td><?= $d['client_fullname'] ?></td>
+                <td><?= $d['courier_fullname'] ?></td>
+                <td><?= $d['delivery_city'] ?></td>
+                <td><?= $d['delivery_street'] ?></td>
+                <td><?= $d['delivery_house'] ?></td>
+                <td><?= empty($d['delivery_entrance']) ? "Не указан" : $d['delivery_entrance'] ?></td>
+                <td><?= empty($d['delivery_apartment']) ? "Не указан" : $d['delivery_apartment']  ?></td>
+                <td><?= empty($d['delivery_floor']) ? "Не указан" : $d['delivery_floor'] ?></td>
+                <td><?= empty($d['delivery_intercome_code']) ? "Не указан" : $d['delivery_intercome_code'] ?></td>
+                <td><?= $d['delivery_date'] ?></td>
+                <td><?= $d['delivery_price'] ?></td>
+                <td><?= $d['delivery_type'] ?></td>
             </tr>
         <?php endforeach; ?>
     </table>

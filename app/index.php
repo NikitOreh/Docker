@@ -1,3 +1,15 @@
+<?php
+require 'db.php';
+
+$stmt = $pdo->query('SELECT * FROM courier ORDER BY courier_fullname');
+$courier = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$stmt = $pdo->query('SELECT * FROM product ORDER BY product_category');
+$product = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,47 +40,32 @@
             </div>
 
             <div class="form-section">
-                <h3>Курьер</h3>
+            <h3>Курьер</h3>
                 <div class="form-group">
                     <label for="courier-select">Выберите курьера:</label>
                     <select name="courier" id="courier-select">
                         <option value="">-- Выберите курьера --</option>
-                        <?php foreach ($courier as $courier): ?>
-                            <option value="<?= htmlspecialchars($courier['courier_email']) ?>">
-                                <?= htmlspecialchars($courier['courier_fullname']) ?> 
-                                (тел: <?= htmlspecialchars($courier['courier_phone']) ?>)
+                        <?php foreach ($courier as $c): ?>
+                            <option value="<?= htmlspecialchars($c['courier_fullname']) ?>">
+                                <?= htmlspecialchars($c['courier_fullname']) ?> 
+                                (тел: <?= htmlspecialchars($c['courier_phone']) ?>)
                             </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
            
                 <h3>Информация о товаре</h3>
-                <div class="filter-section">
-                    <form method="get">
-                        <label for="category">Фильтр по категории:</label>
-                        <select name="category" id="category" onchange="this.form.submit()">
-                            <option value="all">Все категории</option>
-                            <?php foreach ($categories as $category): ?>
-                                <option value="<?= htmlspecialchars($category) ?>" 
-                                    <?= ($selectedCategory === $category) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($category) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </form>
-                </div>
-    
-    <form method="post">
+                <form method="post">
         <label for="product-select">Выберите товар:</label>
         <select name="product" id="product-select" required>
             <option value="">-- Выберите товар --</option>
-            <?php foreach ($products as $product): ?>
-                <option value="<?= htmlspecialchars($product['product_name']) ?>"
-                    data-price="<?= htmlspecialchars($product['product_price']) ?>"
-                    data-category="<?= htmlspecialchars($product['product_category']) ?>">
-                    <?= htmlspecialchars($product['product_name']) ?> 
-                    (<?= htmlspecialchars($product['product_category']) ?>)
-                    - <?= htmlspecialchars($product['product_price']) ?> руб.
+            <?php foreach ($product as $p): ?>
+                <option value="<?= htmlspecialchars($p['product_category']) ?>"
+                    data-price="<?= htmlspecialchars($p['product_price']) ?>"
+                    data-category="<?= htmlspecialchars($p['product_category']) ?>">
+                    <?= htmlspecialchars($p['product_name']) ?> 
+                    (<?= htmlspecialchars($p['product_category']) ?>)
+                    - <?= htmlspecialchars($p['product_price']) ?> руб.
                 </option>
                 <?php endforeach; ?>
         </select>
