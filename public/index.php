@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../app/core/Router.php';
+require_once __DIR__ . '/../src/core/routers.php';
 require_once __DIR__ . '/../app/core/Database.php';
 
 session_start();
