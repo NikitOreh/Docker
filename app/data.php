@@ -148,6 +148,12 @@ $product = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </tr>
         <?php endforeach; ?>
     </table>
+    <div style="margin: 10px 0;">
+    <form action="report.php" method="get" target="_blank">
+        <button type="submit" name="format" value="pdf">Скачать PDF отчёт</button>
+        <button type="submit" name="format" value="excel">Скачать Excel отчёт</button>
+    </form>
+</div>
 </body>
 
 </html>
