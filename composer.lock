@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4ae2af850752ca20e3c3472c95ca9808",
+    "content-hash": "4b4b0380154a8397502d78de5844df19",
     "packages": [
         {
             "name": "composer/pcre",
@@ -84,78 +84,6 @@
                 }
             ],
             "time": "2024-11-12T16:29:46+00:00"
-        },
-        {
-            "name": "fawno/fpdf",
-            "version": "1.86.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/fawno/FPDF.git",
-                "reference": "beb62b2f85ab2ca657590b022c74e29b0bd47ecd"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/fawno/FPDF/zipball/beb62b2f85ab2ca657590b022c74e29b0bd47ecd",
-                "reference": "beb62b2f85ab2ca657590b022c74e29b0bd47ecd",
-                "shasum": ""
-            },
-            "require": {
-                "ext-mbstring": "*",
-                "php": ">=7.2"
-            },
-            "require-dev": {
-                "ddn/sapp": "@stable",
-                "phpunit/phpunit": "@stable",
-                "setasign/fpdi": "@stable"
-            },
-            "suggest": {
-                "ext-openssl": "*",
-                "setasign/fpdi": "@stable"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "FawnoFPDF": "Fawno\\FPDF\\FawnoFPDF",
-                        "FawnoPDFWrapper ": "Fawno\\FPDF\\PDFWrapper"
-                    }
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Fawno\\FPDF\\": "src/",
-                    "FPDF\\Scripts\\": "scripts/"
-                },
-                "classmap": [
-                    "fpdf/fpdf.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Olivier Plathey",
-                    "email": "oliver@fpdf.org",
-                    "homepage": "http://fpdf.org/"
-                },
-                {
-                    "name": "Fernando Herrero",
-                    "homepage": "https://lab.fawno.com"
-                }
-            ],
-            "description": "FPDF is a PHP class which allows to generate PDF files with pure PHP. F from FPDF stands for Free: you may use it for any kind of usage and modify it to suit your needs.",
-            "homepage": "http://www.fpdf.org",
-            "keywords": [
-                "fpdf",
-                "pdf"
-            ],
-            "support": {
-                "issues": "https://github.com/fawno/FPDF/issues",
-                "source": "https://github.com/fawno/FPDF/tree/1.86.4"
-            },
-            "time": "2025-02-15T21:00:31+00:00"
         },
         {
             "name": "maennchen/zipstream-php",
@@ -344,16 +272,16 @@
         },
         {
             "name": "phpoffice/phpspreadsheet",
-            "version": "4.1.0",
+            "version": "4.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
-                "reference": "6ff18c3a8df3a945492f75ce455d77f7ad55dd5c"
+                "reference": "d0ac70d610fb62ccad38c2696569ae1ad42acc70"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/6ff18c3a8df3a945492f75ce455d77f7ad55dd5c",
-                "reference": "6ff18c3a8df3a945492f75ce455d77f7ad55dd5c",
+                "url": "https://api.github.com/repos/PHPOffice/PhpSpreadsheet/zipball/d0ac70d610fb62ccad38c2696569ae1ad42acc70",
+                "reference": "d0ac70d610fb62ccad38c2696569ae1ad42acc70",
                 "shasum": ""
             },
             "require": {
@@ -386,8 +314,9 @@
                 "mitoteam/jpgraph": "^10.3",
                 "mpdf/mpdf": "^8.1.1",
                 "phpcompatibility/php-compatibility": "^9.3",
-                "phpstan/phpstan": "^1.1",
-                "phpstan/phpstan-phpunit": "^1.0",
+                "phpstan/phpstan": "^1.1 || ^2.0",
+                "phpstan/phpstan-deprecation-rules": "^1.0 || ^2.0",
+                "phpstan/phpstan-phpunit": "^1.0 || ^2.0",
                 "phpunit/phpunit": "^10.5",
                 "squizlabs/php_codesniffer": "^3.7",
                 "tecnickcom/tcpdf": "^6.5"
@@ -443,9 +372,9 @@
             ],
             "support": {
                 "issues": "https://github.com/PHPOffice/PhpSpreadsheet/issues",
-                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/4.1.0"
+                "source": "https://github.com/PHPOffice/PhpSpreadsheet/tree/4.3.1"
             },
-            "time": "2025-03-02T06:52:24+00:00"
+            "time": "2025-05-26T18:51:08+00:00"
         },
         {
             "name": "psr/http-client",
@@ -705,309 +634,58 @@
             "time": "2023-06-26T14:44:25+00:00"
         },
         {
-            "name": "symfony/deprecation-contracts",
-            "version": "v3.5.1",
+            "name": "setasign/tfpdf",
+            "version": "v1.33",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/deprecation-contracts.git",
-                "reference": "74c71c939a79f7d5bf3c1ce9f5ea37ba0114c6f6"
+                "url": "https://github.com/Setasign/tFPDF.git",
+                "reference": "050de12ab5359ce475dab49bae5cedbcf455f708"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/deprecation-contracts/zipball/74c71c939a79f7d5bf3c1ce9f5ea37ba0114c6f6",
-                "reference": "74c71c939a79f7d5bf3c1ce9f5ea37ba0114c6f6",
+                "url": "https://api.github.com/repos/Setasign/tFPDF/zipball/050de12ab5359ce475dab49bae5cedbcf455f708",
+                "reference": "050de12ab5359ce475dab49bae5cedbcf455f708",
                 "shasum": ""
             },
-            "require": {
-                "php": ">=8.1"
-            },
             "type": "library",
-            "extra": {
-                "thanks": {
-                    "url": "https://github.com/symfony/contracts",
-                    "name": "symfony/contracts"
-                },
-                "branch-alias": {
-                    "dev-main": "3.5-dev"
-                }
-            },
             "autoload": {
-                "files": [
-                    "function.php"
+                "classmap": [
+                    "tfpdf.php",
+                    "font/unifont/ttfonts.php"
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "MIT"
+                "LGPL-2.1"
             ],
             "authors": [
                 {
-                    "name": "Nicolas Grekas",
-                    "email": "p@tchwork.com"
+                    "name": "Ian Back"
                 },
                 {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "A generic function and convention to trigger deprecation notices",
-            "homepage": "https://symfony.com",
-            "support": {
-                "source": "https://github.com/symfony/deprecation-contracts/tree/v3.5.1"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
+                    "name": "Tycho Veltmeijer",
+                    "email": "tfpdf@tychoveltmeijer.nl",
+                    "role": "Maintainer"
                 },
                 {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
+                    "name": "Olivier Plathey",
+                    "email": "oliver@fpdf.org",
+                    "homepage": "http://fpdf.org/"
                 }
             ],
-            "time": "2024-09-25T14:20:29+00:00"
-        },
-        {
-            "name": "symfony/polyfill-ctype",
-            "version": "v1.31.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "a3cc8b044a6ea513310cbd48ef7333b384945638"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/a3cc8b044a6ea513310cbd48ef7333b384945638",
-                "reference": "a3cc8b044a6ea513310cbd48ef7333b384945638",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2"
-            },
-            "provide": {
-                "ext-ctype": "*"
-            },
-            "suggest": {
-                "ext-ctype": "For best performance"
-            },
-            "type": "library",
-            "extra": {
-                "thanks": {
-                    "url": "https://github.com/symfony/polyfill",
-                    "name": "symfony/polyfill"
-                }
-            },
-            "autoload": {
-                "files": [
-                    "bootstrap.php"
-                ],
-                "psr-4": {
-                    "Symfony\\Polyfill\\Ctype\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Gert de Pagter",
-                    "email": "BackEndTea@gmail.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Symfony polyfill for ctype functions",
-            "homepage": "https://symfony.com",
+            "description": "This class is a modified version of FPDF that adds UTF-8 support. As of version 1.31 it is based on FPDF 1.82. Before it was based on FPDF 1.7.",
+            "homepage": "http://fpdf.org/en/script/script92.php",
             "keywords": [
-                "compatibility",
-                "ctype",
-                "polyfill",
-                "portable"
+                "fpdf",
+                "pdf",
+                "tfpdf",
+                "unicode"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-ctype/tree/v1.31.0"
+                "issues": "https://github.com/Setasign/tFPDF/issues",
+                "source": "https://github.com/Setasign/tFPDF/tree/v1.33"
             },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2024-09-09T11:45:10+00:00"
-        },
-        {
-            "name": "symfony/polyfill-mbstring",
-            "version": "v1.31.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "85181ba99b2345b0ef10ce42ecac37612d9fd341"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/85181ba99b2345b0ef10ce42ecac37612d9fd341",
-                "reference": "85181ba99b2345b0ef10ce42ecac37612d9fd341",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2"
-            },
-            "provide": {
-                "ext-mbstring": "*"
-            },
-            "suggest": {
-                "ext-mbstring": "For best performance"
-            },
-            "type": "library",
-            "extra": {
-                "thanks": {
-                    "url": "https://github.com/symfony/polyfill",
-                    "name": "symfony/polyfill"
-                }
-            },
-            "autoload": {
-                "files": [
-                    "bootstrap.php"
-                ],
-                "psr-4": {
-                    "Symfony\\Polyfill\\Mbstring\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Nicolas Grekas",
-                    "email": "p@tchwork.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Symfony polyfill for the Mbstring extension",
-            "homepage": "https://symfony.com",
-            "keywords": [
-                "compatibility",
-                "mbstring",
-                "polyfill",
-                "portable",
-                "shim"
-            ],
-            "support": {
-                "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.31.0"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2024-09-09T11:45:10+00:00"
-        },
-        {
-            "name": "twig/twig",
-            "version": "v3.20.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/twigphp/Twig.git",
-                "reference": "3468920399451a384bef53cf7996965f7cd40183"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/3468920399451a384bef53cf7996965f7cd40183",
-                "reference": "3468920399451a384bef53cf7996965f7cd40183",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=8.1.0",
-                "symfony/deprecation-contracts": "^2.5|^3",
-                "symfony/polyfill-ctype": "^1.8",
-                "symfony/polyfill-mbstring": "^1.3"
-            },
-            "require-dev": {
-                "phpstan/phpstan": "^2.0",
-                "psr/container": "^1.0|^2.0",
-                "symfony/phpunit-bridge": "^5.4.9|^6.4|^7.0"
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "src/Resources/core.php",
-                    "src/Resources/debug.php",
-                    "src/Resources/escaper.php",
-                    "src/Resources/string_loader.php"
-                ],
-                "psr-4": {
-                    "Twig\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com",
-                    "homepage": "http://fabien.potencier.org",
-                    "role": "Lead Developer"
-                },
-                {
-                    "name": "Twig Team",
-                    "role": "Contributors"
-                },
-                {
-                    "name": "Armin Ronacher",
-                    "email": "armin.ronacher@active-4.com",
-                    "role": "Project Founder"
-                }
-            ],
-            "description": "Twig, the flexible, fast, and secure template language for PHP",
-            "homepage": "https://twig.symfony.com",
-            "keywords": [
-                "templating"
-            ],
-            "support": {
-                "issues": "https://github.com/twigphp/Twig/issues",
-                "source": "https://github.com/twigphp/Twig/tree/v3.20.0"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/twig/twig",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2025-02-13T08:34:43+00:00"
+            "time": "2022-12-20T10:26:07+00:00"
         }
     ],
     "packages-dev": [],

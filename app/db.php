@@ -1,8 +1,8 @@
 <?php 
     $host = 'db';
-    $dbname = 'mydb';
-    $user = 'user';
-    $pass = 'userpass';
+    $dbname = 'sklad';
+    $user = 'root';
+    $pass = 'rootpass';
 
     try {
         $pdo = new PDO(

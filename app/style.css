@@ -1,0 +1,46 @@
+/* Стили для сортируемых таблиц */
+table.sortable th.sort-header {
+    position: relative;
+    padding-right: 25px !important;
+    cursor: pointer !important;
+    background-color: #e9ecef !important;
+    user-select: none;
+}
+
+table.sortable th.sort-header .sort-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+table.sortable th.sort-header .sort-icon {
+    display: inline-block !important;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    font-size: 16px;
+    line-height: 16px;
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    visibility: visible !important;
+    color: #6c757d;
+}
+
+table.sortable th.sort-header:hover {
+    background-color: #d3d7db !important;
+}
+
+/* Стили для форм */
+.add-form, .edit-form {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+/* Стили для кнопок */
+.btn-primary, .btn-success, .btn-secondary, .btn-warning, .btn-danger {
+    margin-right: 5px;
+}

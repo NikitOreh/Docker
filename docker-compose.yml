@@ -19,7 +19,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: mydb
+      MYSQL_DATABASE: sklad
       MYSQL_USER: user
       MYSQL_PASSWORD: userpass
     volumes:
