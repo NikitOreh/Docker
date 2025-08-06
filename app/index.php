@@ -151,18 +151,18 @@ foreach ($allowed_tables[$role] as $table) {
         }
         switch ($table) {
             case 'client':
-                $stmt = $pdo->query("SELECT client_id, client_email, client_phone, client_address, client_company_or_full_name FROM client$order_by");
+                $stmt = $pdo->query("SELECT client_id, client_email, client_phone, client_address, client_company_or_full_name FROM client WHERE is_deleted = 0 ORDER BY client_id");
                 $data['client'] = ['headers' => ['ID', 'Email', 'Телефон', 'Адрес', 'Компания'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'employee':
-                $stmt = $pdo->query("SELECT employee_id, employee_full_name, employee_phone FROM employee$order_by");
+                $stmt = $pdo->query("SELECT employee_id, employee_full_name, employee_phone FROM employee WHERE is_deleted = 0 ORDER BY employee_id");
                 $data['employee'] = ['headers' => ['ID', 'ФИО', 'Телефон'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'master':
                 $stmt = $pdo->query("SHOW TABLES LIKE 'master'");
                 if ($stmt->rowCount() > 0) {
                     if ($role === 'master' && $master_id) {
-                        $stmt = $pdo->prepare("SELECT master_id, master_full_name, master_phone FROM master WHERE master_id = ?$order_by");
+                        $stmt = $pdo->prepare("SELECT master_id, master_full_name, master_phone FROM master WHERE master_id = ? and WHERE is_deleted = 0 ORDER BY master_id");
                         $stmt->execute([$master_id]);
                     } else {
                         $stmt = $pdo->query("SELECT master_id, master_full_name, master_phone FROM master$order_by");
@@ -174,32 +174,32 @@ foreach ($allowed_tables[$role] as $table) {
                 }
                 break;
             case 'equipment_instance':
-                $stmt = $pdo->query("SELECT equipment_instance_code, equipment_instance_name, employee_full_name, equipment_instance_status, equipment_instance_price FROM equipment_instance$order_by");
+                $stmt = $pdo->query("SELECT equipment_instance_code, equipment_instance_name, employee_full_name, equipment_instance_status, equipment_instance_price FROM equipment_instance WHERE is_deleted = 0 ORDER BY equipment_instance_code");
                 $data['equipment_instance'] = ['headers' => ['Код', 'Название', 'Сотрудник', 'Статус', 'Цена'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'maintenance':
                 if ($role === 'master' && $master_id) {
-                    $stmt = $pdo->prepare("SELECT equipment_instance_name, maintenance_number, master_full_name, maintenance_price, maintenance_status, maintenance_date FROM maintenance WHERE master_id = ?$order_by");
+                    $stmt = $pdo->prepare("SELECT equipment_instance_name, maintenance_number, master_full_name, maintenance_price, maintenance_status, maintenance_date FROM maintenance WHERE master_id = ?$ and WHERE is_deleted = 0 ORDER BY maintenance_number");
                     $stmt->execute([$master_id]);
                 } else {
-                    $stmt = $pdo->query("SELECT equipment_instance_name, maintenance_number, master_full_name, maintenance_price, maintenance_status, maintenance_date FROM maintenance$order_by");
+                    $stmt = $pdo->query("SELECT equipment_instance_name, maintenance_number, master_full_name, maintenance_price, maintenance_status, maintenance_date FROM maintenance WHERE is_deleted = 0 ORDER BY maintenance_number");
                 }
                 $data['maintenance'] = ['headers' => ['Оборудование', 'Номер обслуживания', 'Мастер', 'Цена', 'Статус', 'Дата'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'product':
-                $stmt = $pdo->query("SELECT product_code, product_name, price, stock_quantity, product_unit_of_measurement FROM product$order_by");
+                $stmt = $pdo->query("SELECT product_code, product_name, price, stock_quantity, product_unit_of_measurement FROM product WHERE is_deleted = 0 ORDER BY product_code");
                 $data['product'] = ['headers' => ['Код', 'Название', 'Цена', 'Остаток', 'Единица измерения'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'shipping':
-                $stmt = $pdo->query("SELECT shipment_number, shipping_date, shipment_status, employee_full_name, client_company_or_full_name FROM shipping$order_by");
+                $stmt = $pdo->query("SELECT shipment_number, shipping_date, shipment_status, employee_full_name, client_company_or_full_name FROM shipping WHERE is_deleted = 0 ORDER BY shipment_number");
                 $data['shipping'] = ['headers' => ['Номер отгрузки', 'Дата', 'Статус', 'Сотрудник', 'Клиент'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'supply':
-                $stmt = $pdo->query("SELECT supply_number, supply_status, supplier_company_or_full_name FROM supply$order_by");
+                $stmt = $pdo->query("SELECT supply_number, supply_status, supplier_company_or_full_name FROM supply WHERE is_deleted = 0 ORDER BY supply_number");
                 $data['supply'] = ['headers' => ['Номер поставки', 'Статус', 'Поставщик'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'supplier':
-                $stmt = $pdo->query("SELECT supplier_id, supplier_company_or_full_name, supplier_email, supplier_phone, supplier_address FROM supplier$order_by");
+                $stmt = $pdo->query("SELECT supplier_id, supplier_company_or_full_name, supplier_email, supplier_phone, supplier_address FROM supplier WHERE is_deleted = 0 ORDER BY supplier_id");
                 $data['supplier'] = ['headers' => ['ID', 'Компания', 'Email', 'Телефон', 'Адрес'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
         }
