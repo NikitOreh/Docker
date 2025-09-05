@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = JSON.parse(rowData);
         const form = document.getElementById(`edit-form-${tableName}`);
         if (form) {
-            // Учитываем составные ключи для maintenance и shipment_product
             if (tableName === 'maintenance') {
                 form.querySelector('input[name="equipment_instance_code"]').value = data.equipment_instance_code || '';
                 form.querySelector('input[name="maintenance_number"]').value = data.maintenance_number || '';
@@ -55,12 +54,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function addRecord(tableName, event) {
         event.preventDefault();
         const form = document.getElementById(`add-form-${tableName}`);
-        const formData = new FormData(form);
-        formData.append('table', tableName);
+        if (!form) {
+            console.error(`Add form not found for ${tableName}`);
+            alert('Ошибка: форма не найдена');
+            return;
+        }
+
         const button = form.querySelector('button[type="submit"]');
+        if (!button) {
+            console.error(`Submit button not found in form for ${tableName}`);
+            alert('Ошибка: кнопка отправки не найдена');
+            return;
+        }
+
         button.disabled = true;
         button.textContent = 'Сохранение...';
-        console.log(`Sending add request for ${tableName}`, Object.fromEntries(formData));
+
+        const formData = new FormData(form);
+        formData.append('table', tableName);
 
         fetch('add.php', {
             method: 'POST',
@@ -73,72 +84,53 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             button.disabled = false;
             button.textContent = 'Сохранить';
-            console.log(`Add response for ${tableName}:`, data);
             if (data.success) {
-                alert('Запись добавлена!');
-                location.reload();
+                alert('Запись успешно добавлена!');
+                location.reload(); // Обновляем страницу для отображения новой записи
+                hideAddForm(tableName);
             } else {
-                alert('Ошибка: ' + data.error);
-            }
-        })
-        .catch(error => {
-            button.disabled = false;
-            button.textContent = 'Сохранить';
-            console.error(`Add error for ${tableName}:`, error);
-            alert('Ошибка: ' + error.message);
-        });
-    }
-
-    function submitEditForm(tableName, id) {
-        const form = document.getElementById(`edit-form-${tableName}`);
-        const formData = new FormData(form);
-        formData.append('table', tableName);
-        if (tableName === 'maintenance') {
-            formData.append('equipment_instance_code', form.querySelector('input[name="equipment_instance_code"]').value);
-            formData.append('maintenance_number', form.querySelector('input[name="maintenance_number"]').value);
-        } else if (tableName === 'shipment_product') {
-            formData.append('shipment_number', form.querySelector('input[name="shipment_number"]').value);
-            formData.append('product_code', form.querySelector('input[name="product_code"]').value);
-        } else {
-            formData.append('id', id);
-        }
-        const button = form.querySelector('button[type="submit"]');
-        button.disabled = true;
-        button.textContent = 'Сохранение...';
-        console.log(`Sending edit request for ${tableName}`, Object.fromEntries(formData));
-
-        fetch('update.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            console.log(`Edit response status for ${tableName}: ${response.status}`);
-            return response.json();
-        })
-        .then(data => {
-            button.disabled = false;
-            button.textContent = 'Сохранить';
-            console.log(`Edit response for ${tableName}:`, data);
-            if (data.success) {
-                alert('Запись обновлена!');
-                location.reload();
-            } else {
-                const errorDiv = document.getElementById(`error-${tableName}-${id}`) || document.createElement('div');
-                errorDiv.id = `error-${tableName}-${id}`;
+                console.error(`Add error for ${tableName}:`, data.error);
+                const errorDiv = document.getElementById(`error-add-${tableName}`) || document.createElement('div');
+                errorDiv.id = `error-add-${tableName}`;
                 errorDiv.className = 'alert alert-danger';
-                errorDiv.textContent = data.error;
+                errorDiv.textContent = data.error || 'Неизвестная ошибка';
                 form.prepend(errorDiv);
             }
         })
         .catch(error => {
             button.disabled = false;
             button.textContent = 'Сохранить';
-            console.error(`Edit error for ${tableName}:`, error);
-            const errorDiv = document.getElementById(`error-${tableName}-${id}`) || document.createElement('div');
-            errorDiv.id = `error-${tableName}-${id}`;
+            console.error(`Add error for ${tableName}:`, error);
+            const errorDiv = document.getElementById(`error-add-${tableName}`) || document.createElement('div');
+            errorDiv.id = `error-add-${tableName}`;
             errorDiv.className = 'alert alert-danger';
             errorDiv.textContent = 'Ошибка: ' + error.message;
             form.prepend(errorDiv);
+        });
+    }
+
+    function submitEditForm(tableName, id) {
+        const form = document.getElementById(`form-${tableName}-${id}`);
+        const formData = new FormData(form);
+        formData.append('id', id);
+        formData.append('table', tableName);
+
+        fetch('update.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Обновление интерфейса (оставляем как есть)
+                hideEditForm(tableName);
+                document.getElementById(`error-${tableName}-${id}`).textContent = '';
+            } else {
+                document.getElementById(`error-${tableName}-${id}`).textContent = data.error;
+            }
+        })
+        .catch(error => {
+            document.getElementById(`error-${tableName}-${id}`).textContent = 'Ошибка: ' + error.message;
         });
     }
 

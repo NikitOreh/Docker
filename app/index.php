@@ -1,6 +1,7 @@
 <?php
 session_start();
 require __DIR__ . '/db.php';
+
 // Проверка авторизации
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
@@ -16,10 +17,79 @@ $success = '';
 
 // Определение доступных таблиц для каждой роли
 $allowed_tables = [
-    'admin' => ['client', 'employee', 'master', 'equipment_instance', 'maintenance', 'product', 'shipping', 'supply', 'supplier'],
-    'accountant' => ['client', 'employee', 'maintenance', 'product', 'shipping', 'supply', 'supplier'],
+    'admin' => ['client', 'employee', 'master', 'equipment_instance', 'maintenance', 'product', 'shipping', 'supply', 'supplier', 'shipment_product'],
+    'accountant' => ['client', 'employee', 'maintenance', 'product', 'shipping', 'supply', 'supplier', 'shipment_product'],
     'employee' => ['product', 'equipment_instance', 'shipping', 'maintenance'],
     'master' => ['equipment_instance', 'maintenance']
+];
+
+// Определение полей для форм добавления, включая идентификаторы
+$forms_fields = [
+    'client' => [
+        ['name' => 'client_id', 'type' => 'number', 'label' => 'ID клиента', 'required' => true],
+        ['name' => 'client_email', 'type' => 'email', 'label' => 'Email', 'required' => false],
+        ['name' => 'client_phone', 'type' => 'text', 'label' => 'Телефон', 'required' => true],
+        ['name' => 'client_address', 'type' => 'text', 'label' => 'Адрес', 'required' => true],
+        ['name' => 'client_company_or_full_name', 'type' => 'text', 'label' => 'Компания/ФИО', 'required' => true]
+    ],
+    'employee' => [
+        ['name' => 'employee_id', 'type' => 'number', 'label' => 'ID сотрудника', 'required' => true],
+        ['name' => 'employee_full_name', 'type' => 'text', 'label' => 'ФИО', 'required' => true],
+        ['name' => 'employee_phone', 'type' => 'text', 'label' => 'Телефон', 'required' => true]
+    ],
+    'master' => [
+        ['name' => 'master_id', 'type' => 'number', 'label' => 'ID мастера', 'required' => true],
+        ['name' => 'master_full_name', 'type' => 'text', 'label' => 'ФИО', 'required' => true],
+        ['name' => 'master_phone', 'type' => 'text', 'label' => 'Телефон', 'required' => true]
+    ],
+    'equipment_instance' => [
+        ['name' => 'equipment_instance_code', 'type' => 'number', 'label' => 'Код оборудования', 'required' => true],
+        ['name' => 'equipment_instance_name', 'type' => 'text', 'label' => 'Название оборудования', 'required' => true],
+        ['name' => 'employee_id', 'type' => 'number', 'label' => 'ID сотрудника', 'required' => false],
+        ['name' => 'equipment_instance_status', 'type' => 'text', 'label' => 'Статус', 'required' => true],
+        ['name' => 'equipment_instance_price', 'type' => 'number', 'label' => 'Цена', 'required' => true]
+    ],
+    'maintenance' => [
+        ['name' => 'equipment_instance_code', 'type' => 'number', 'label' => 'Код оборудования', 'required' => true],
+        ['name' => 'maintenance_number', 'type' => 'number', 'label' => 'Номер обслуживания', 'required' => true],
+        ['name' => 'master_id', 'type' => 'number', 'label' => 'ID мастера', 'required' => true],
+        ['name' => 'maintenance_price', 'type' => 'number', 'label' => 'Цена обслуживания', 'required' => true],
+        ['name' => 'maintenance_status', 'type' => 'text', 'label' => 'Статус', 'required' => true],
+        ['name' => 'maintenance_date', 'type' => 'date', 'label' => 'Дата обслуживания', 'required' => true]
+    ],
+    'product' => [
+        ['name' => 'product_code', 'type' => 'number', 'label' => 'Код товара', 'required' => true],
+        ['name' => 'product_name', 'type' => 'text', 'label' => 'Название товара', 'required' => true],
+        ['name' => 'price', 'type' => 'number', 'label' => 'Цена', 'required' => true],
+        ['name' => 'stock_quantity', 'type' => 'number', 'label' => 'Количество на складе', 'required' => true],
+        ['name' => 'product_unit_of_measurement', 'type' => 'text', 'label' => 'Единица измерения', 'required' => true]
+    ],
+    'shipping' => [
+        ['name' => 'shipment_number', 'type' => 'number', 'label' => 'Номер отгрузки', 'required' => true],
+        ['name' => 'shipping_date', 'type' => 'date', 'label' => 'Дата отгрузки', 'required' => true],
+        ['name' => 'shipment_status', 'type' => 'text', 'label' => 'Статус отгрузки', 'required' => true],
+        ['name' => 'employee_id', 'type' => 'number', 'label' => 'ID сотрудника', 'required' => true],
+        ['name' => 'client_id', 'type' => 'number', 'label' => 'ID клиента', 'required' => true]
+    ],
+    'supply' => [
+        ['name' => 'supply_number', 'type' => 'number', 'label' => 'Номер поставки', 'required' => true],
+        ['name' => 'supply_status', 'type' => 'text', 'label' => 'Статус поставки', 'required' => true],
+        ['name' => 'supplier_id', 'type' => 'number', 'label' => 'ID поставщика', 'required' => true]
+    ],
+    'supplier' => [
+        ['name' => 'supplier_id', 'type' => 'number', 'label' => 'ID поставщика', 'required' => true],
+        ['name' => 'supplier_company_or_full_name', 'type' => 'text', 'label' => 'Компания/ФИО', 'required' => true],
+        ['name' => 'supplier_email', 'type' => 'email', 'label' => 'Email', 'required' => false],
+        ['name' => 'supplier_phone', 'type' => 'text', 'label' => 'Телефон', 'required' => true],
+        ['name' => 'supplier_address', 'type' => 'text', 'label' => 'Адрес', 'required' => true],
+        ['name' => 'supplier_full_name', 'type' => 'text', 'label' => 'ФИО', 'required' => false]
+    ],
+    'shipment_product' => [
+        ['name' => 'shipment_number', 'type' => 'number', 'label' => 'Номер отгрузки', 'required' => true],
+        ['name' => 'product_code', 'type' => 'number', 'label' => 'Код товара', 'required' => true],
+        ['name' => 'shipment_product_quantity', 'type' => 'number', 'label' => 'Количество', 'required' => true],
+        ['name' => 'shipment_product_price', 'type' => 'number', 'label' => 'Цена', 'required' => true]
+    ]
 ];
 
 // Обработка параметров сортировки
@@ -32,8 +102,8 @@ if ($role === 'accountant' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_P
     $shipment_number = trim($_POST['shipment_number'] ?? '');
     $shipping_date = trim($_POST['shipping_date'] ?? '');
     $shipment_status = trim($_POST['shipment_status'] ?? '');
-    $employee_id_post = trim($_POST['employee_full_name'] ?? '');
-    $client_id = trim($_POST['client_company_or_full_name'] ?? '');
+    $employee_id_post = trim($_POST['employee_id'] ?? '');
+    $client_id = trim($_POST['client_id'] ?? '');
 
     if (empty($shipment_number)) $errors[] = 'Номер отгрузки обязателен.';
     if (empty($shipping_date)) $errors[] = 'Дата отгрузки обязательна.';
@@ -43,7 +113,7 @@ if ($role === 'accountant' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_P
 
     if (empty($errors)) {
         try {
-            $stmt = $pdo->prepare('INSERT INTO shipping (shipment_number, shipping_date, shipment_status, employee_full_name, client_company_or_full_name, is_new) VALUES (?, ?, ?, ?, ?, 1)');
+            $stmt = $pdo->prepare('INSERT INTO shipping (shipment_number, shipping_date, shipment_status, employee_id, client_id, is_deleted) VALUES (?, ?, ?, ?, ?, 0)');
             $stmt->execute([$shipment_number, $shipping_date, $shipment_status, $employee_id_post, $client_id]);
             $success = 'Отгрузка успешно добавлена.';
         } catch (PDOException $e) {
@@ -54,9 +124,9 @@ if ($role === 'accountant' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_P
 
 // Обработка добавления техобслуживания для сотрудника
 if ($role === 'employee' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_maintenance'])) {
-    $equipment_instance_code = trim($_POST['equipment_instance_name'] ?? '');
+    $equipment_instance_code = trim($_POST['equipment_instance_code'] ?? '');
     $maintenance_number = trim($_POST['maintenance_number'] ?? '');
-    $master_id_post = trim($_POST['master_full_name'] ?? '');
+    $master_id_post = trim($_POST['master_id'] ?? '');
     $maintenance_price = trim($_POST['maintenance_price'] ?? '');
     $maintenance_status = trim($_POST['maintenance_status'] ?? '');
     $maintenance_date = trim($_POST['maintenance_date'] ?? '');
@@ -70,7 +140,7 @@ if ($role === 'employee' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POS
 
     if (empty($errors)) {
         try {
-            $stmt = $pdo->prepare('INSERT INTO maintenance (equipment_instance_name, maintenance_number, master_full_name, maintenance_price, maintenance_status, maintenance_date, is_new) VALUES (?, ?, ?, ?, ?, ?, 1)');
+            $stmt = $pdo->prepare('INSERT INTO maintenance (equipment_instance_code, maintenance_number, master_id, maintenance_price, maintenance_status, maintenance_date, is_deleted) VALUES (?, ?, ?, ?, ?, ?, 0)');
             $stmt->execute([$equipment_instance_code, $maintenance_number, $master_id_post, $maintenance_price, $maintenance_status, $maintenance_date]);
             $success = 'Техобслуживание успешно добавлено.';
         } catch (PDOException $e) {
@@ -82,9 +152,9 @@ if ($role === 'employee' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POS
 // Получение списка сотрудников и клиентов для формы
 if ($role === 'accountant') {
     try {
-        $stmt = $pdo->query('SELECT employee_id, employee_full_name FROM employee ORDER BY employee_full_name');
+        $stmt = $pdo->query('SELECT employee_id, employee_full_name FROM employee WHERE is_deleted = 0 ORDER BY employee_full_name');
         $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        $stmt = $pdo->query('SELECT client_id, client_company_or_full_name FROM client ORDER BY client_company_or_full_name');
+        $stmt = $pdo->query('SELECT client_id, client_company_or_full_name FROM client WHERE is_deleted = 0 ORDER BY client_company_or_full_name');
         $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         $errors[] = 'Ошибка загрузки данных: ' . $e->getMessage();
@@ -94,11 +164,11 @@ if ($role === 'accountant') {
 // Получение списка оборудования и мастеров для формы сотрудника
 if ($role === 'employee') {
     try {
-        $stmt = $pdo->query('SELECT equipment_instance_code, equipment_instance_name FROM equipment_instance ORDER BY equipment_instance_name');
+        $stmt = $pdo->query('SELECT equipment_instance_code, equipment_instance_name FROM equipment_instance WHERE is_deleted = 0 ORDER BY equipment_instance_name');
         $equipment_instances = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $stmt = $pdo->query("SHOW TABLES LIKE 'master'");
         if ($stmt->rowCount() > 0) {
-            $stmt = $pdo->query('SELECT m.master_id, m.master_full_name FROM master m JOIN users u ON m.user_id = u.user_id WHERE u.role = "master" ORDER BY m.master_full_name');
+            $stmt = $pdo->query('SELECT master_id, master_full_name FROM master WHERE is_deleted = 0 ORDER BY master_full_name');
             $masters = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } else {
             $errors[] = 'Таблица master не найдена в базе данных.';
@@ -113,11 +183,11 @@ if ($role === 'employee') {
 $new_shipments = [];
 if ($role === 'employee' && $employee_id) {
     try {
-        $stmt = $pdo->prepare('SELECT shipment_number, shipping_date, client_id FROM shipping WHERE employee_id = ? AND is_new = 1');
+        $stmt = $pdo->prepare('SELECT shipment_number, shipping_date, client_id FROM shipping WHERE employee_id = ? AND is_new = 1 AND is_deleted = 0');
         $stmt->execute([$employee_id]);
         $new_shipments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if (!empty($new_shipments)) {
-            $stmt = $pdo->prepare('UPDATE shipping SET is_new = 0 WHERE employee_id = ? AND is_new = 1');
+            $stmt = $pdo->prepare('UPDATE shipping SET is_new = 0 WHERE employee_id = ? AND is_new = 1 AND is_deleted = 0');
             $stmt->execute([$employee_id]);
         }
     } catch (PDOException $e) {
@@ -129,11 +199,11 @@ if ($role === 'employee' && $employee_id) {
 $new_maintenances = [];
 if ($role === 'master' && $master_id) {
     try {
-        $stmt = $pdo->prepare('SELECT maintenance_number, maintenance_date, equipment_instance_code FROM maintenance WHERE master_id = ? AND is_new = 1');
+        $stmt = $pdo->prepare('SELECT maintenance_number, maintenance_date, equipment_instance_code FROM maintenance WHERE master_id = ? AND is_new = 1 AND is_deleted = 0');
         $stmt->execute([$master_id]);
         $new_maintenances = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if (!empty($new_maintenances)) {
-            $stmt = $pdo->prepare('UPDATE maintenance SET is_new = 0 WHERE master_id = ? AND is_new = 1');
+            $stmt = $pdo->prepare('UPDATE maintenance SET is_new = 0 WHERE master_id = ? AND is_new = 1 AND is_deleted = 0');
             $stmt->execute([$master_id]);
         }
     } catch (PDOException $e) {
@@ -145,27 +215,24 @@ if ($role === 'master' && $master_id) {
 $data = [];
 foreach ($allowed_tables[$role] as $table) {
     try {
-        $order_by = '';
-        if ($sort_table === $table && !empty($sort_field)) {
-            $order_by = " ORDER BY `$sort_field` $sort_direction";
-        }
+        $order_by = $sort_table === $table && !empty($sort_field) ? " ORDER BY `$sort_field` $sort_direction" : '';
         switch ($table) {
             case 'client':
-                $stmt = $pdo->query("SELECT client_id, client_email, client_phone, client_address, client_company_or_full_name FROM client WHERE is_deleted = 0 ORDER BY client_id");
-                $data['client'] = ['headers' => ['ID', 'Email', 'Телефон', 'Адрес', 'Компания'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
+                $stmt = $pdo->query("SELECT client_id, client_email, client_phone, client_address, client_company_or_full_name FROM client WHERE is_deleted = 0$order_by");
+                $data['client'] = ['headers' => ['ID', 'Email', 'Телефон', 'Адрес', 'Компания/ФИО'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'employee':
-                $stmt = $pdo->query("SELECT employee_id, employee_full_name, employee_phone FROM employee WHERE is_deleted = 0 ORDER BY employee_id");
+                $stmt = $pdo->query("SELECT employee_id, employee_full_name, employee_phone FROM employee WHERE is_deleted = 0$order_by");
                 $data['employee'] = ['headers' => ['ID', 'ФИО', 'Телефон'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'master':
                 $stmt = $pdo->query("SHOW TABLES LIKE 'master'");
                 if ($stmt->rowCount() > 0) {
                     if ($role === 'master' && $master_id) {
-                        $stmt = $pdo->prepare("SELECT master_id, master_full_name, master_phone FROM master WHERE master_id = ? and WHERE is_deleted = 0 ORDER BY master_id");
+                        $stmt = $pdo->prepare("SELECT master_id, master_full_name, master_phone FROM master WHERE master_id = ? AND is_deleted = 0$order_by");
                         $stmt->execute([$master_id]);
                     } else {
-                        $stmt = $pdo->query("SELECT master_id, master_full_name, master_phone FROM master$order_by");
+                        $stmt = $pdo->query("SELECT master_id, master_full_name, master_phone FROM master WHERE is_deleted = 0$order_by");
                     }
                     $data['master'] = ['headers' => ['ID', 'ФИО', 'Телефон'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 } else {
@@ -174,33 +241,37 @@ foreach ($allowed_tables[$role] as $table) {
                 }
                 break;
             case 'equipment_instance':
-                $stmt = $pdo->query("SELECT equipment_instance_code, equipment_instance_name, employee_full_name, equipment_instance_status, equipment_instance_price FROM equipment_instance WHERE is_deleted = 0 ORDER BY equipment_instance_code");
-                $data['equipment_instance'] = ['headers' => ['Код', 'Название', 'Сотрудник', 'Статус', 'Цена'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
+                $stmt = $pdo->query("SELECT equipment_instance_code, equipment_instance_name, employee_id, equipment_instance_status, equipment_instance_price FROM equipment_instance WHERE is_deleted = 0$order_by");
+                $data['equipment_instance'] = ['headers' => ['Код', 'Название', 'ID сотрудника', 'Статус', 'Цена'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'maintenance':
                 if ($role === 'master' && $master_id) {
-                    $stmt = $pdo->prepare("SELECT equipment_instance_name, maintenance_number, master_full_name, maintenance_price, maintenance_status, maintenance_date FROM maintenance WHERE master_id = ?$ and WHERE is_deleted = 0 ORDER BY maintenance_number");
+                    $stmt = $pdo->prepare("SELECT equipment_instance_code, maintenance_number, master_id, maintenance_price, maintenance_status, maintenance_date FROM maintenance WHERE master_id = ? AND is_deleted = 0$order_by");
                     $stmt->execute([$master_id]);
                 } else {
-                    $stmt = $pdo->query("SELECT equipment_instance_name, maintenance_number, master_full_name, maintenance_price, maintenance_status, maintenance_date FROM maintenance WHERE is_deleted = 0 ORDER BY maintenance_number");
+                    $stmt = $pdo->query("SELECT equipment_instance_code, maintenance_number, master_id, maintenance_price, maintenance_status, maintenance_date FROM maintenance WHERE is_deleted = 0$order_by");
                 }
-                $data['maintenance'] = ['headers' => ['Оборудование', 'Номер обслуживания', 'Мастер', 'Цена', 'Статус', 'Дата'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
+                $data['maintenance'] = ['headers' => ['Код оборудования', 'Номер обслуживания', 'ID мастера', 'Цена', 'Статус', 'Дата'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'product':
-                $stmt = $pdo->query("SELECT product_code, product_name, price, stock_quantity, product_unit_of_measurement FROM product WHERE is_deleted = 0 ORDER BY product_code");
+                $stmt = $pdo->query("SELECT product_code, product_name, price, stock_quantity, product_unit_of_measurement FROM product WHERE is_deleted = 0$order_by");
                 $data['product'] = ['headers' => ['Код', 'Название', 'Цена', 'Остаток', 'Единица измерения'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'shipping':
-                $stmt = $pdo->query("SELECT shipment_number, shipping_date, shipment_status, employee_full_name, client_company_or_full_name FROM shipping WHERE is_deleted = 0 ORDER BY shipment_number");
-                $data['shipping'] = ['headers' => ['Номер отгрузки', 'Дата', 'Статус', 'Сотрудник', 'Клиент'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
+                $stmt = $pdo->query("SELECT shipment_number, shipping_date, shipment_status, employee_id, client_id FROM shipping WHERE is_deleted = 0$order_by");
+                $data['shipping'] = ['headers' => ['Номер отгрузки', 'Дата', 'Статус', 'ID сотрудника', 'ID клиента'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'supply':
-                $stmt = $pdo->query("SELECT supply_number, supply_status, supplier_company_or_full_name FROM supply WHERE is_deleted = 0 ORDER BY supply_number");
-                $data['supply'] = ['headers' => ['Номер поставки', 'Статус', 'Поставщик'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
+                $stmt = $pdo->query("SELECT supply_number, supply_status, supplier_id FROM supply WHERE is_deleted = 0$order_by");
+                $data['supply'] = ['headers' => ['Номер поставки', 'Статус', 'ID поставщика'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
             case 'supplier':
-                $stmt = $pdo->query("SELECT supplier_id, supplier_company_or_full_name, supplier_email, supplier_phone, supplier_address FROM supplier WHERE is_deleted = 0 ORDER BY supplier_id");
-                $data['supplier'] = ['headers' => ['ID', 'Компания', 'Email', 'Телефон', 'Адрес'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
+                $stmt = $pdo->query("SELECT supplier_id, supplier_company_or_full_name, supplier_email, supplier_phone, supplier_address, supplier_full_name FROM supplier WHERE is_deleted = 0$order_by");
+                $data['supplier'] = ['headers' => ['ID', 'Компания/ФИО', 'Email', 'Телефон', 'Адрес', 'ФИО'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
+                break;
+            case 'shipment_product':
+                $stmt = $pdo->query("SELECT shipment_number, product_code, shipment_product_quantity, shipment_product_price FROM shipment_product$order_by");
+                $data['shipment_product'] = ['headers' => ['Номер отгрузки', 'Код товара', 'Количество', 'Цена'], 'rows' => $stmt->fetchAll(PDO::FETCH_ASSOC)];
                 break;
         }
     } catch (PDOException $e) {
@@ -213,12 +284,13 @@ foreach ($allowed_tables[$role] as $table) {
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управление складом</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body data-debug="true">
-    <header>
+    <header class="bg-primary text-white p-3">
         <h1>Управление складом</h1>
         <p>Пользователь: <?php echo htmlspecialchars($username); ?> (
             <?php
@@ -232,7 +304,7 @@ foreach ($allowed_tables[$role] as $table) {
         )</p>
         <a href="report.php?format=pdf" class="btn btn-secondary">Скачать PDF</a>
         <a href="report.php?format=excel" class="btn btn-secondary">Скачать Excel</a>
-        <a href="login.php" class="btn btn-danger">Выйти</a>
+        <a href="logout.php" class="btn btn-danger">Выйти</a>
     </header>
 
     <main class="container mt-4">
@@ -277,7 +349,7 @@ foreach ($allowed_tables[$role] as $table) {
                 <input type="hidden" name="add_shipping" value="1">
                 <div class="mb-3">
                     <label for="shipment_number" class="form-label">Номер отгрузки</label>
-                    <input type="text" class="form-control" id="shipment_number" name="shipment_number" required>
+                    <input type="number" class="form-control" id="shipment_number" name="shipment_number" required>
                 </div>
                 <div class="mb-3">
                     <label for="shipping_date" class="form-label">Дата отгрузки</label>
@@ -304,8 +376,8 @@ foreach ($allowed_tables[$role] as $table) {
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label for="client_id_form" class="form-label">Клиент</label>
-                    <select class="form-select" id="client_id_form" name="client_id_form" required>
+                    <label for="client_id" class="form-label">Клиент</label>
+                    <select class="form-select" id="client_id" name="client_id" required>
                         <option value="">Выберите клиента</option>
                         <?php foreach ($clients as $client): ?>
                             <option value="<?php echo htmlspecialchars($client['client_id']); ?>">
@@ -335,7 +407,7 @@ foreach ($allowed_tables[$role] as $table) {
                 </div>
                 <div class="mb-3">
                     <label for="maintenance_number" class="form-label">Номер обслуживания</label>
-                    <input type="text" class="form-control" id="maintenance_number" name="maintenance_number" required>
+                    <input type="number" class="form-control" id="maintenance_number" name="maintenance_number" required>
                 </div>
                 <div class="mb-3">
                     <label for="master_id" class="form-label">Мастер</label>
@@ -369,74 +441,59 @@ foreach ($allowed_tables[$role] as $table) {
             </form>
         <?php endif; ?>
 
-        <?php foreach ($data as $table_name => $table_data): ?>
+        <?php foreach ($allowed_tables[$role] as $table_name): ?>
             <section class="mt-4">
                 <h2><?php echo htmlspecialchars(ucfirst($table_name)); ?></h2>
-                <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'maintenance', 'product', 'shipping', 'supply', 'supplier']))): ?>
+                <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'employee', 'maintenance', 'product', 'shipping', 'supply', 'supplier', 'shipment_product']))): ?>
                     <button type="button" class="btn btn-primary mb-2" onclick="showAddForm('<?php echo htmlspecialchars($table_name); ?>')">Добавить запись</button>
-                <?php endif; ?>
-                <div id="add-form-<?php echo htmlspecialchars($table_name); ?>" class="add-form" style="display: none;">
-                    <h3>Добавить в <?php echo htmlspecialchars(ucfirst($table_name)); ?></h3>
-                    <form id="add-form-<?php echo htmlspecialchars($table_name); ?>" onsubmit="addRecord('<?php echo htmlspecialchars($table_name); ?>', event)">
-                        <?php foreach ($table_data['headers'] as $index => $header): ?>
-                            <?php $field = array_keys($table_data['rows'][0] ?? [])[$index] ?? strtolower(str_replace(' ', '_', $header)); ?>
+                    <form id="add-form-<?php echo htmlspecialchars($table_name); ?>" class="add-form" style="display: none;" onsubmit="addRecord('<?php echo htmlspecialchars($table_name); ?>', event)">
+                        <div id="error-add-<?php echo htmlspecialchars($table_name); ?>" class="alert alert-danger" style="display: none;"></div>
+                        <?php foreach ($forms_fields[$table_name] as $field): ?>
                             <div class="mb-3">
-                                <label for="<?php echo htmlspecialchars($field); ?>-add-<?php echo htmlspecialchars($table_name); ?>" class="form-label"><?php echo htmlspecialchars($header); ?></label>
-                                <input type="text" class="form-control" id="<?php echo htmlspecialchars($field); ?>-add-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field); ?>" required>
+                                <label for="<?php echo htmlspecialchars($field['name']); ?>-add-<?php echo htmlspecialchars($table_name); ?>" class="form-label"><?php echo htmlspecialchars($field['label']); ?><?php echo $field['required'] ? ' *' : ''; ?></label>
+                                <input type="<?php echo htmlspecialchars($field['type']); ?>" class="form-control" id="<?php echo htmlspecialchars($field['name']); ?>-add-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?> <?php echo $field['name'] === 'client_phone' ? 'pattern="\d{10,15}" title="Введите только цифры (10-15)"' : ''; ?>>
                             </div>
                         <?php endforeach; ?>
                         <button type="submit" class="btn btn-success">Сохранить</button>
                         <button type="button" class="btn btn-secondary" onclick="hideAddForm('<?php echo htmlspecialchars($table_name); ?>')">Отмена</button>
                     </form>
-                </div>
-                <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'maintenance', 'product', 'shipping', 'supply', 'supplier']))): ?>
-                    <div id="edit-form-<?php echo htmlspecialchars($table_name); ?>" class="edit-form" style="display: none;">
-                        <h3>Редактировать запись в <?php echo htmlspecialchars(ucfirst($table_name)); ?></h3>
-                        <form id="edit-form-<?php echo htmlspecialchars($table_name); ?>" onsubmit="submitEditForm('<?php echo htmlspecialchars($table_name); ?>', '<?php echo htmlspecialchars($table_data['rows'][0][array_keys($table_data['rows'][0])[0]] ?? ''); ?>')">
-                            <input type="hidden" name="id">
-                            <?php foreach ($table_data['headers'] as $index => $header): ?>
-                                <?php $field = array_keys($table_data['rows'][0] ?? [])[$index] ?? strtolower(str_replace(' ', '_', $header)); ?>
-                                <div class="mb-3">
-                                    <label for="<?php echo htmlspecialchars($field); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" class="form-label"><?php echo htmlspecialchars($header); ?></label>
-                                    <input type="text" class="form-control" id="<?php echo htmlspecialchars($field); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field); ?>" required>
-                                </div>
-                            <?php endforeach; ?>
-                            <button type="submit" class="btn btn-success">Сохранить</button>
-                            <button type="button" class="btn btn-secondary" onclick="hideEditForm('<?php echo htmlspecialchars($table_name); ?>')">Отмена</button>
-                        </form>
-                    </div>
                 <?php endif; ?>
                 <table class="table table-bordered sortable" data-table-name="<?php echo htmlspecialchars($table_name); ?>">
                     <thead>
                         <tr>
-                            <?php foreach ($table_data['headers'] as $index => $header): ?>
+                            <?php foreach ($data[$table_name]['headers'] as $index => $header): ?>
                                 <?php 
-                                $field = array_keys($table_data['rows'][0] ?? [])[$index] ?? strtolower(str_replace(' ', '_', $header));
+                                $field = array_keys($data[$table_name]['rows'][0] ?? [])[$index] ?? strtolower(str_replace(' ', '_', $header));
                                 $new_direction = ($sort_table === $table_name && $sort_field === $field && $sort_direction === 'ASC') ? 'DESC' : 'ASC';
                                 $icon = ($sort_table === $table_name && $sort_field === $field) ? ($sort_direction === 'ASC' ? '↑' : '↓') : '↕';
                                 ?>
-                                <th class="sort-header" data-sort="<?php echo htmlspecialchars($field); ?>" data-sort-type="<?php echo htmlspecialchars(in_array($field, ['client_id', 'employee_id', 'master_id', 'equipment_instance_price', 'maintenance_price', 'price', 'stock_quantity', 'supplier_id']) ? 'number' : (in_array($field, ['shipping_date', 'maintenance_date']) ? 'date' : 'string')); ?>">
+                                <th class="sort-header" data-sort="<?php echo htmlspecialchars($field); ?>" data-sort-type="<?php echo htmlspecialchars(in_array($field, ['client_id', 'employee_id', 'master_id', 'equipment_instance_code', 'maintenance_number', 'product_code', 'shipment_number', 'supply_number', 'supplier_id', 'shipment_product_quantity', 'shipment_product_price']) ? 'number' : (in_array($field, ['shipping_date', 'maintenance_date']) ? 'date' : 'string')); ?>">
                                     <a href="?table=<?php echo htmlspecialchars($table_name); ?>&sort=<?php echo htmlspecialchars($field); ?>&direction=<?php echo htmlspecialchars($new_direction); ?>" class="sort-link">
                                         <?php echo htmlspecialchars($header); ?>
                                         <span class="sort-icon"><?php echo $icon; ?></span>
                                     </a>
                                 </th>
                             <?php endforeach; ?>
-                            <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'maintenance', 'product', 'shipping', 'supply', 'supplier']))): ?>
+                            <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'employee', 'maintenance', 'product', 'shipping', 'supply', 'supplier', 'shipment_product']))): ?>
                                 <th>Действия</th>
                             <?php endif; ?>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($table_data['rows'] as $row): ?>
+                        <?php foreach ($data[$table_name]['rows'] as $row): ?>
                             <tr>
                                 <?php foreach ($row as $col): ?>
                                     <td><?php echo htmlspecialchars($col ?? ''); ?></td>
                                 <?php endforeach; ?>
-                                <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'maintenance', 'product', 'shipping', 'supply', 'supplier']))): ?>
+                                <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'employee', 'maintenance', 'product', 'shipping', 'supply', 'supplier', 'shipment_product']))): ?>
                                     <td>
                                         <button type="button" class="btn btn-warning btn-sm" onclick="showEditForm('<?php echo htmlspecialchars($table_name); ?>', '<?php echo htmlspecialchars(json_encode($row, JSON_UNESCAPED_UNICODE)); ?>')">Редактировать</button>
-                                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteRecord('<?php echo htmlspecialchars($table_name); ?>', '<?php echo htmlspecialchars($row[array_keys($row)[0]]); ?>')">Удалить</button>
+                                        <?php
+                                        $id = ($table_name === 'maintenance' ? $row['equipment_instance_code'] . '-' . $row['maintenance_number'] :
+                                              ($table_name === 'shipment_product' ? $row['shipment_number'] . '-' . $row['product_code'] :
+                                              $row[array_keys($row)[0]]));
+                                        ?>
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteRecord('<?php echo htmlspecialchars($table_name); ?>', '<?php echo htmlspecialchars($id); ?>')">Удалить</button>
                                     </td>
                                 <?php endif; ?>
                             </tr>
