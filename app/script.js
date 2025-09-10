@@ -23,18 +23,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = JSON.parse(rowData);
         const form = document.getElementById(`edit-form-${tableName}`);
         if (form) {
+            // Сохраняем ключевые поля в dataset
             if (tableName === 'maintenance') {
-                form.querySelector('input[name="equipment_instance_code"]').value = data.equipment_instance_code || '';
-                form.querySelector('input[name="maintenance_number"]').value = data.maintenance_number || '';
+                form.dataset.keyEquipmentInstanceName = data.equipment_instance_name || '';
+                form.dataset.keyMaintenanceNumber = data.maintenance_number || '';
             } else if (tableName === 'shipment_product') {
-                form.querySelector('input[name="shipment_number"]').value = data.shipment_number || '';
-                form.querySelector('input[name="product_code"]').value = data.product_code || '';
+                form.dataset.keyShipmentNumber = data.shipment_number || '';
+                form.dataset.keyProductCode = data.product_code || '';
             } else {
-                form.querySelector('input[name="id"]').value = data[Object.keys(data)[0]] || '';
+                const idField = Object.keys(data)[0];
+                form.dataset.keyId = data[idField] || '';
             }
+            // Заполняем поля формы
             Object.keys(data).forEach(key => {
                 const input = form.querySelector(`input[name="${key}"], select[name="${key}"]`);
-                if (input) input.value = data[key] || '';
+                if (input) {
+                    if (input.type === 'checkbox') {
+                        input.checked = data[key] === '1' || data[key] === true;
+                    } else {
+                        input.value = data[key] || '';
+                    }
+                }
             });
             form.style.display = 'block';
             console.log(`Show edit form for ${tableName}`, data);
@@ -86,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
             button.textContent = 'Сохранить';
             if (data.success) {
                 alert('Запись успешно добавлена!');
-                location.reload(); // Обновляем страницу для отображения новой записи
+                location.reload();
                 hideAddForm(tableName);
             } else {
                 console.error(`Add error for ${tableName}:`, data.error);
@@ -109,28 +118,79 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function submitEditForm(tableName, id) {
-        const form = document.getElementById(`form-${tableName}-${id}`);
+    function submitEditForm(tableName) {
+        const form = document.getElementById(`edit-form-${tableName}`);
+        if (!form) {
+            console.error(`Edit form not found for ${tableName}`);
+            alert('Ошибка: форма редактирования не найдена');
+            return;
+        }
+
+        const button = form.querySelector('button[type="submit"]');
+        if (!button) {
+            console.error(`Submit button not found in edit form for ${tableName}`);
+            alert('Ошибка: кнопка отправки не найдена');
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = 'Сохранение...';
+
         const formData = new FormData(form);
-        formData.append('id', id);
-        formData.append('table', tableName);
+        const data = { table: tableName };
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        // Добавляем ключевые поля из dataset
+        if (tableName === 'maintenance') {
+            data.equipment_instance_name = form.dataset.keyEquipmentInstanceName;
+            data.maintenance_number = form.dataset.keyMaintenanceNumber;
+        } else if (tableName === 'shipment_product') {
+            data.shipment_number = form.dataset.keyShipmentNumber;
+            data.product_code = form.dataset.keyProductCode;
+        } else {
+            data[tableName + '_id'] = form.dataset.keyId;
+        }
+
+        console.log('Sending edit data:', data);
 
         fetch('update.php', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Обновление интерфейса (оставляем как есть)
+        .then(response => {
+            console.log(`Edit response status for ${tableName}: ${response.status}`);
+            return response.json();
+        })
+        .then(result => {
+            button.disabled = false;
+            button.textContent = 'Сохранить';
+            if (result.success) {
+                alert('Запись успешно обновлена!');
                 hideEditForm(tableName);
-                document.getElementById(`error-${tableName}-${id}`).textContent = '';
+                location.reload();
             } else {
-                document.getElementById(`error-${tableName}-${id}`).textContent = data.error;
+                console.error(`Edit error for ${tableName}:`, result.error);
+                const errorDiv = document.getElementById(`error-edit-${tableName}`) || document.createElement('div');
+                errorDiv.id = `error-edit-${tableName}`;
+                errorDiv.className = 'alert alert-danger';
+                errorDiv.textContent = result.error || 'Неизвестная ошибка';
+                form.prepend(errorDiv);
             }
         })
         .catch(error => {
-            document.getElementById(`error-${tableName}-${id}`).textContent = 'Ошибка: ' + error.message;
+            button.disabled = false;
+            button.textContent = 'Сохранить';
+            console.error(`Edit error for ${tableName}:`, error);
+            const errorDiv = document.getElementById(`error-edit-${tableName}`) || document.createElement('div');
+            errorDiv.id = `error-edit-${tableName}`;
+            errorDiv.className = 'alert alert-danger';
+            errorDiv.textContent = 'Ошибка: ' + error.message;
+            form.prepend(errorDiv);
         });
     }
 
@@ -140,8 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('table', tableName);
         if (tableName === 'maintenance') {
-            const [equipment_instance_code, maintenance_number] = id.split('-');
-            formData.append('equipment_instance_code', equipment_instance_code);
+            const [equipment_instance_name, maintenance_number] = id.split('-');
+            formData.append('equipment_instance_name', equipment_instance_name);
             formData.append('maintenance_number', maintenance_number);
         } else if (tableName === 'shipment_product') {
             const [shipment_number, product_code] = id.split('-');

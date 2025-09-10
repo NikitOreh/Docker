@@ -122,6 +122,23 @@ if ($role === 'accountant' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_P
     }
 }
 
+if (in_array($role, ['admin', 'accountant', 'employee', 'master'])) {
+    try {
+        $stmt = $pdo->query('SELECT employee_id, employee_full_name FROM employee WHERE is_deleted = 0 ORDER BY employee_full_name');
+        $employees = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $pdo->query('SELECT client_id, client_company_or_full_name FROM client WHERE is_deleted = 0 ORDER BY client_company_or_full_name');
+        $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $pdo->query('SELECT supplier_id, supplier_company_or_full_name FROM supplier WHERE is_deleted = 0 ORDER BY supplier_company_or_full_name');
+        $suppliers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $pdo->query('SELECT equipment_instance_code, equipment_instance_name FROM equipment_instance WHERE is_deleted = 0 ORDER BY equipment_instance_name');
+        $equipment_instances = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt = $pdo->query('SELECT master_id, master_full_name FROM master WHERE is_deleted = 0 ORDER BY master_full_name');
+        $masters = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        $errors[] = 'Ошибка загрузки данных: ' . $e->getMessage();
+    }
+}
+
 // Обработка добавления техобслуживания для сотрудника
 if ($role === 'employee' && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_maintenance'])) {
     $equipment_instance_code = trim($_POST['equipment_instance_code'] ?? '');
@@ -457,6 +474,79 @@ foreach ($allowed_tables[$role] as $table) {
                         <button type="submit" class="btn btn-success">Сохранить</button>
                         <button type="button" class="btn btn-secondary" onclick="hideAddForm('<?php echo htmlspecialchars($table_name); ?>')">Отмена</button>
                     </form>
+                    <!-- Форма редактирования -->
+<div id="edit-form-<?php echo htmlspecialchars($table_name); ?>" class="edit-form" style="display: none;">
+    <h3>Редактировать <?php echo htmlspecialchars(ucfirst($table_name)); ?></h3>
+    <div id="error-edit-<?php echo htmlspecialchars($table_name); ?>" class="alert alert-danger" style="display: none;"></div>
+    <form id="edit-form-<?php echo htmlspecialchars($table_name); ?>" onsubmit="submitEditForm('<?php echo htmlspecialchars($table_name); ?>')">
+        <?php if ($table_name === 'maintenance'): ?>
+            <input type="hidden" name="equipment_instance_name">
+            <input type="hidden" name="maintenance_number">
+        <?php elseif ($table_name === 'shipment_product'): ?>
+            <input type="hidden" name="shipment_number">
+            <input type="hidden" name="product_code">
+        <?php else: ?>
+            <input type="hidden" name="<?php echo htmlspecialchars($table_name . '_id'); ?>">
+        <?php endif; ?>
+        <?php foreach ($forms_fields[$table_name] as $field): ?>
+            <div class="mb-3">
+                <label for="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" class="form-label"><?php echo htmlspecialchars($field['label']); ?><?php echo $field['required'] ? ' *' : ''; ?></label>
+                <?php if ($field['name'] === 'is_new'): ?>
+                    <input type="checkbox" class="form-check-input" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" value="1">
+                <?php elseif ($field['name'] === 'master_full_name' && $table_name === 'maintenance'): ?>
+                    <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
+                        <option value="">Выберите мастера</option>
+                        <?php foreach ($masters as $master): ?>
+                            <option value="<?php echo htmlspecialchars($master['master_full_name']); ?>">
+                                <?php echo htmlspecialchars($master['master_full_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php elseif ($field['name'] === 'employee_full_name' && ($table_name === 'shipping' || $table_name === 'equipment_instance')): ?>
+                    <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
+                        <option value="">Выберите сотрудника</option>
+                        <?php foreach ($employees as $employee): ?>
+                            <option value="<?php echo htmlspecialchars($employee['employee_full_name']); ?>">
+                                <?php echo htmlspecialchars($employee['employee_full_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php elseif ($field['name'] === 'client_company_or_full_name' && $table_name === 'shipping'): ?>
+                    <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
+                        <option value="">Выберите клиента</option>
+                        <?php foreach ($clients as $client): ?>
+                            <option value="<?php echo htmlspecialchars($client['client_company_or_full_name']); ?>">
+                                <?php echo htmlspecialchars($client['client_company_or_full_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php elseif ($field['name'] === 'supplier_company_or_full_name' && $table_name === 'supply'): ?>
+                    <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
+                        <option value="">Выберите поставщика</option>
+                        <?php foreach ($suppliers as $supplier): ?>
+                            <option value="<?php echo htmlspecialchars($supplier['supplier_company_or_full_name']); ?>">
+                                <?php echo htmlspecialchars($supplier['supplier_company_or_full_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php elseif ($field['name'] === 'equipment_instance_name' && $table_name === 'maintenance'): ?>
+                    <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
+                        <option value="">Выберите оборудование</option>
+                        <?php foreach ($equipment_instances as $equipment): ?>
+                            <option value="<?php echo htmlspecialchars($equipment['equipment_instance_name']); ?>">
+                                <?php echo htmlspecialchars($equipment['equipment_instance_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                <?php else: ?>
+                    <input type="<?php echo htmlspecialchars($field['type']); ?>" class="form-control" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['type'] === 'number' && strpos($field['name'], 'price') !== false ? 'step="0.01"' : ''; ?> <?php echo $field['required'] ? 'required' : ''; ?> <?php echo in_array($field['name'], ['client_phone', 'employee_phone', 'master_phone', 'supplier_phone']) ? 'pattern="[\d+]{10,15}" title="Введите только цифры (10-15)"' : ''; ?>>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <button type="button" class="btn btn-secondary" onclick="hideEditForm('<?php echo htmlspecialchars($table_name); ?>')">Отмена</button>
+    </form>
+</div>
                 <?php endif; ?>
                 <table class="table table-bordered sortable" data-table-name="<?php echo htmlspecialchars($table_name); ?>">
                     <thead>
