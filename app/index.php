@@ -307,6 +307,7 @@ foreach ($allowed_tables[$role] as $table) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body data-debug="true">
+    
     <header class="bg-primary text-white p-3">
         <h1>Управление складом</h1>
         <p>Пользователь: <?php echo htmlspecialchars($username); ?> (
@@ -323,7 +324,18 @@ foreach ($allowed_tables[$role] as $table) {
         <a href="report.php?format=excel" class="btn btn-secondary">Скачать Excel</a>
         <a href="logout.php" class="btn btn-danger">Выйти</a>
     </header>
-
+<nav id="sidebar">
+        <h5>Таблицы</h5>
+        <ul class="nav flex-column">
+            <?php foreach ($allowed_tables[$role] as $tbl): ?>
+                <li class="nav-item">
+                    <a href="#" class="nav-link table-link" data-table="<?= htmlspecialchars($tbl) ?>">
+                        <?= htmlspecialchars($tbl) ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    </nav>
     <main class="container mt-4">
         <?php if ($success): ?>
             <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
@@ -360,106 +372,8 @@ foreach ($allowed_tables[$role] as $table) {
             </div>
         <?php endif; ?>
 
-        <?php if ($role === 'accountant'): ?>
-            <h3 class="mt-3">Добавить новую отгрузку</h3>
-            <form method="POST" class="mt-3">
-                <input type="hidden" name="add_shipping" value="1">
-                <div class="mb-3">
-                    <label for="shipment_number" class="form-label">Номер отгрузки</label>
-                    <input type="number" class="form-control" id="shipment_number" name="shipment_number" required>
-                </div>
-                <div class="mb-3">
-                    <label for="shipping_date" class="form-label">Дата отгрузки</label>
-                    <input type="date" class="form-control" id="shipping_date" name="shipping_date" required>
-                </div>
-                <div class="mb-3">
-                    <label for="shipment_status" class="form-label">Статус</label>
-                    <select class="form-select" id="shipment_status" name="shipment_status" required>
-                        <option value="">Выберите статус</option>
-                        <option value="В обработке">В обработке</option>
-                        <option value="Отправлено">Отправлено</option>
-                        <option value="Доставлено">Доставлено</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="employee_id" class="form-label">Сотрудник</label>
-                    <select class="form-select" id="employee_id" name="employee_id" required>
-                        <option value="">Выберите сотрудника</option>
-                        <?php foreach ($employees as $employee): ?>
-                            <option value="<?php echo htmlspecialchars($employee['employee_id']); ?>">
-                                <?php echo htmlspecialchars($employee['employee_full_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="client_id" class="form-label">Клиент</label>
-                    <select class="form-select" id="client_id" name="client_id" required>
-                        <option value="">Выберите клиента</option>
-                        <?php foreach ($clients as $client): ?>
-                            <option value="<?php echo htmlspecialchars($client['client_id']); ?>">
-                                <?php echo htmlspecialchars($client['client_company_or_full_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Добавить отгрузку</button>
-            </form>
-        <?php endif; ?>
-
-        <?php if ($role === 'employee'): ?>
-            <h3 class="mt-3">Добавить новое техобслуживание</h3>
-            <form method="POST" class="mt-3">
-                <input type="hidden" name="add_maintenance" value="1">
-                <div class="mb-3">
-                    <label for="equipment_instance_code" class="form-label">Код оборудования</label>
-                    <select class="form-select" id="equipment_instance_code" name="equipment_instance_code" required>
-                        <option value="">Выберите оборудование</option>
-                        <?php foreach ($equipment_instances as $equipment): ?>
-                            <option value="<?php echo htmlspecialchars($equipment['equipment_instance_code']); ?>">
-                                <?php echo htmlspecialchars($equipment['equipment_instance_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="maintenance_number" class="form-label">Номер обслуживания</label>
-                    <input type="number" class="form-control" id="maintenance_number" name="maintenance_number" required>
-                </div>
-                <div class="mb-3">
-                    <label for="master_id" class="form-label">Мастер</label>
-                    <select class="form-select" id="master_id" name="master_id" required>
-                        <option value="">Выберите мастера</option>
-                        <?php foreach ($masters as $master): ?>
-                            <option value="<?php echo htmlspecialchars($master['master_id']); ?>">
-                                <?php echo htmlspecialchars($master['master_full_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="maintenance_price" class="form-label">Цена</label>
-                    <input type="number" step="0.01" min="0" class="form-control" id="maintenance_price" name="maintenance_price" required>
-                </div>
-                <div class="mb-3">
-                    <label for="maintenance_status" class="form-label">Статус</label>
-                    <select class="form-select" id="maintenance_status" name="maintenance_status" required>
-                        <option value="">Выберите статус</option>
-                        <option value="Запланировано">Запланировано</option>
-                        <option value="В процессе">В процессе</option>
-                        <option value="Завершено">Завершено</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="maintenance_date" class="form-label">Дата обслуживания</label>
-                    <input type="date" class="form-control" id="maintenance_date" name="maintenance_date" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Добавить техобслуживание</button>
-            </form>
-        <?php endif; ?>
-
         <?php foreach ($allowed_tables[$role] as $table_name): ?>
-            <section class="mt-4">
+            <section class="table-section mt-4" id="table-<?= htmlspecialchars($table_name) ?>" style="display: none;">
                 <h2><?php echo htmlspecialchars(ucfirst($table_name)); ?></h2>
                 <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'employee', 'maintenance', 'product', 'shipping', 'supply', 'supplier', 'shipment_product']))): ?>
                     <button type="button" class="btn btn-primary mb-2" onclick="showAddForm('<?php echo htmlspecialchars($table_name); ?>')">Добавить запись</button>
@@ -592,9 +506,131 @@ foreach ($allowed_tables[$role] as $table) {
                 </table>
             </section>
         <?php endforeach; ?>
+
+        <?php if ($role === 'accountant'): ?>
+            <h3 class="mt-3">Добавить новую отгрузку</h3>
+            <form method="POST" class="mt-3">
+                <input type="hidden" name="add_shipping" value="1">
+                <div class="mb-3">
+                    <label for="shipment_number" class="form-label">Номер отгрузки</label>
+                    <input type="number" class="form-control" id="shipment_number" name="shipment_number" required>
+                </div>
+                <div class="mb-3">
+                    <label for="shipping_date" class="form-label">Дата отгрузки</label>
+                    <input type="date" class="form-control" id="shipping_date" name="shipping_date" required>
+                </div>
+                <div class="mb-3">
+                    <label for="shipment_status" class="form-label">Статус</label>
+                    <select class="form-select" id="shipment_status" name="shipment_status" required>
+                        <option value="">Выберите статус</option>
+                        <option value="В обработке">В обработке</option>
+                        <option value="Отправлено">Отправлено</option>
+                        <option value="Доставлено">Доставлено</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="employee_id" class="form-label">Сотрудник</label>
+                    <select class="form-select" id="employee_id" name="employee_id" required>
+                        <option value="">Выберите сотрудника</option>
+                        <?php foreach ($employees as $employee): ?>
+                            <option value="<?php echo htmlspecialchars($employee['employee_id']); ?>">
+                                <?php echo htmlspecialchars($employee['employee_full_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="client_id" class="form-label">Клиент</label>
+                    <select class="form-select" id="client_id" name="client_id" required>
+                        <option value="">Выберите клиента</option>
+                        <?php foreach ($clients as $client): ?>
+                            <option value="<?php echo htmlspecialchars($client['client_id']); ?>">
+                                <?php echo htmlspecialchars($client['client_company_or_full_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Добавить отгрузку</button>
+            </form>
+        <?php endif; ?>
+
+        <?php if ($role === 'employee'): ?>
+            <h3 class="mt-3">Добавить новое техобслуживание</h3>
+            <form method="POST" class="mt-3">
+                <input type="hidden" name="add_maintenance" value="1">
+                <div class="mb-3">
+                    <label for="equipment_instance_code" class="form-label">Код оборудования</label>
+                    <select class="form-select" id="equipment_instance_code" name="equipment_instance_code" required>
+                        <option value="">Выберите оборудование</option>
+                        <?php foreach ($equipment_instances as $equipment): ?>
+                            <option value="<?php echo htmlspecialchars($equipment['equipment_instance_code']); ?>">
+                                <?php echo htmlspecialchars($equipment['equipment_instance_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="maintenance_number" class="form-label">Номер обслуживания</label>
+                    <input type="number" class="form-control" id="maintenance_number" name="maintenance_number" required>
+                </div>
+                <div class="mb-3">
+                    <label for="master_id" class="form-label">Мастер</label>
+                    <select class="form-select" id="master_id" name="master_id" required>
+                        <option value="">Выберите мастера</option>
+                        <?php foreach ($masters as $master): ?>
+                            <option value="<?php echo htmlspecialchars($master['master_id']); ?>">
+                                <?php echo htmlspecialchars($master['master_full_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="maintenance_price" class="form-label">Цена</label>
+                    <input type="number" step="0.01" min="0" class="form-control" id="maintenance_price" name="maintenance_price" required>
+                </div>
+                <div class="mb-3">
+                    <label for="maintenance_status" class="form-label">Статус</label>
+                    <select class="form-select" id="maintenance_status" name="maintenance_status" required>
+                        <option value="">Выберите статус</option>
+                        <option value="Запланировано">Запланировано</option>
+                        <option value="В процессе">В процессе</option>
+                        <option value="Завершено">Завершено</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="maintenance_date" class="form-label">Дата обслуживания</label>
+                    <input type="date" class="form-control" id="maintenance_date" name="maintenance_date" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Добавить техобслуживание</button>
+            </form>
+        <?php endif; ?>
     </main>
 
     <script src="script.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const links = document.querySelectorAll('.table-link');
+    const sections = document.querySelectorAll('.table-section');
+
+    function showTable(name) {
+        sections.forEach(sec => {
+            sec.style.display = (sec.id === 'table-' + name) ? 'block' : 'none';
+        });
+        // подсветка активной ссылки
+        links.forEach(l => l.classList.toggle('active', l.dataset.table === name));
+    }
+
+    // начальное отображение первой таблицы
+    if (links.length) showTable(links[0].dataset.table);
+
+    links.forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            showTable(link.dataset.table);
+        });
+    });
+});
+</script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

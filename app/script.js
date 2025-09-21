@@ -244,4 +244,31 @@ document.addEventListener('DOMContentLoaded', () => {
     window.deleteRecord = deleteRecord;
 
     console.log('Script: Initialization complete');
+
+
+    // === Переключение таблиц ===
+    const menuLinks = document.querySelectorAll('.sidebar a[data-table]');
+    const sections  = document.querySelectorAll('.table-section');
+
+    function showTable(table) {
+        sections.forEach(sec => {
+            sec.style.display = sec.id === `table-${table}` ? 'block' : 'none';
+        });
+        menuLinks.forEach(link => {
+            link.classList.toggle('active', link.dataset.table === table);
+        });
+        console.log(`Sidebar: switched to ${table}`);
+    }
+
+    menuLinks.forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            showTable(link.dataset.table);
+        });
+    });
+
+    // при загрузке показываем первую таблицу
+    if (menuLinks.length) {
+        showTable(menuLinks[0].dataset.table);
+    }
 });
