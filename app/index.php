@@ -307,7 +307,6 @@ foreach ($allowed_tables[$role] as $table) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body data-debug="true">
-    
     <header class="bg-primary text-white p-3">
         <h1>Управление складом</h1>
         <p>Пользователь: <?php echo htmlspecialchars($username); ?> (
@@ -322,315 +321,327 @@ foreach ($allowed_tables[$role] as $table) {
         )</p>
         <a href="report.php?format=pdf" class="btn btn-secondary">Скачать PDF</a>
         <a href="report.php?format=excel" class="btn btn-secondary">Скачать Excel</a>
-        <a href="logout.php" class="btn btn-danger">Выйти</a>
+        <a href="login.php" class="btn btn-danger">Выйти</a>
     </header>
-<nav id="sidebar">
-        <h5>Таблицы</h5>
-        <ul class="nav flex-column">
-            <?php foreach ($allowed_tables[$role] as $tbl): ?>
-                <li class="nav-item">
-                    <a href="#" class="nav-link table-link" data-table="<?= htmlspecialchars($tbl) ?>">
-                        <?= htmlspecialchars($tbl) ?>
-                    </a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    </nav>
-    <main class="container mt-4">
-        <?php if ($success): ?>
-            <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
-        <?php endif; ?>
-        <?php if (!empty($errors)): ?>
-            <div class="alert alert-danger">
-                <?php foreach ($errors as $error): ?>
-                    <p><?php echo htmlspecialchars($error); ?></p>
+
+    <div class="d-flex">
+        <nav id="sidebar" class="sidebar">
+            <button id="toggle-sidebar" class="btn btn-secondary mb-3">☰</button>
+            <h5>Таблицы</h5>
+            <ul class="nav flex-column">
+                <?php foreach ($allowed_tables[$role] as $tbl): ?>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link table-link" data-table="<?= htmlspecialchars($tbl) ?>">
+                            <?= htmlspecialchars($tbl) ?>
+                        </a>
+                    </li>
                 <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($role === 'employee' && !empty($new_shipments)): ?>
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <strong>Новая отгрузка!</strong> У вас есть новые отгрузки:
-                <ul>
-                    <?php foreach ($new_shipments as $shipment): ?>
-                        <li>Отгрузка №<?php echo htmlspecialchars($shipment['shipment_number']); ?> от <?php echo htmlspecialchars($shipment['shipping_date']); ?></li>
+            </ul>
+        </nav>
+        <main class="main-content flex-grow-1 p-3">
+            <?php if ($success): ?>
+                <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
+            <?php endif; ?>
+            <?php if (!empty($errors)): ?>
+                <div class="alert alert-danger">
+                    <?php foreach ($errors as $error): ?>
+                        <p><?php echo htmlspecialchars($error); ?></p>
                     <?php endforeach; ?>
-                </ul>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
-            </div>
-        <?php endif; ?>
+                </div>
+            <?php endif; ?>
 
-        <?php if ($role === 'master' && !empty($new_maintenances)): ?>
-            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <strong>Новое техобслуживание!</strong> У вас есть новые задания:
-                <ul>
-                    <?php foreach ($new_maintenances as $maintenance): ?>
-                        <li>Техобслуживание №<?php echo htmlspecialchars($maintenance['maintenance_number']); ?> от <?php echo htmlspecialchars($maintenance['maintenance_date']); ?> (Код оборудования: <?php echo htmlspecialchars($maintenance['equipment_instance_code']); ?>)</li>
-                    <?php endforeach; ?>
-                </ul>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
-            </div>
-        <?php endif; ?>
+            <?php if ($role === 'employee' && !empty($new_shipments)): ?>
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong>Новая отгрузка!</strong> У вас есть новые отгрузки:
+                    <ul>
+                        <?php foreach ($new_shipments as $shipment): ?>
+                            <li>Отгрузка №<?php echo htmlspecialchars($shipment['shipment_number']); ?> от <?php echo htmlspecialchars($shipment['shipping_date']); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+                </div>
+            <?php endif; ?>
 
-        <?php foreach ($allowed_tables[$role] as $table_name): ?>
-            <section class="table-section mt-4" id="table-<?= htmlspecialchars($table_name) ?>" style="display: none;">
-                <h2><?php echo htmlspecialchars(ucfirst($table_name)); ?></h2>
-                <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'employee', 'maintenance', 'product', 'shipping', 'supply', 'supplier', 'shipment_product']))): ?>
-                    <button type="button" class="btn btn-primary mb-2" onclick="showAddForm('<?php echo htmlspecialchars($table_name); ?>')">Добавить запись</button>
-                    <form id="add-form-<?php echo htmlspecialchars($table_name); ?>" class="add-form" style="display: none;" onsubmit="addRecord('<?php echo htmlspecialchars($table_name); ?>', event)">
-                        <div id="error-add-<?php echo htmlspecialchars($table_name); ?>" class="alert alert-danger" style="display: none;"></div>
-                        <?php foreach ($forms_fields[$table_name] as $field): ?>
-                            <div class="mb-3">
-                                <label for="<?php echo htmlspecialchars($field['name']); ?>-add-<?php echo htmlspecialchars($table_name); ?>" class="form-label"><?php echo htmlspecialchars($field['label']); ?><?php echo $field['required'] ? ' *' : ''; ?></label>
-                                <input type="<?php echo htmlspecialchars($field['type']); ?>" class="form-control" id="<?php echo htmlspecialchars($field['name']); ?>-add-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?> <?php echo $field['name'] === 'client_phone' ? 'pattern="\d{10,15}" title="Введите только цифры (10-15)"' : ''; ?>>
-                            </div>
+            <?php if ($role === 'master' && !empty($new_maintenances)): ?>
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <strong>Новое техобслуживание!</strong> У вас есть новые задания:
+                    <ul>
+                        <?php foreach ($new_maintenances as $maintenance): ?>
+                            <li>Техобслуживание №<?php echo htmlspecialchars($maintenance['maintenance_number']); ?> от <?php echo htmlspecialchars($maintenance['maintenance_date']); ?> (Код оборудования: <?php echo htmlspecialchars($maintenance['equipment_instance_code']); ?>)</li>
                         <?php endforeach; ?>
-                        <button type="submit" class="btn btn-success">Сохранить</button>
-                        <button type="button" class="btn btn-secondary" onclick="hideAddForm('<?php echo htmlspecialchars($table_name); ?>')">Отмена</button>
-                    </form>
-                    <!-- Форма редактирования -->
-<div id="edit-form-<?php echo htmlspecialchars($table_name); ?>" class="edit-form" style="display: none;">
-    <h3>Редактировать <?php echo htmlspecialchars(ucfirst($table_name)); ?></h3>
-    <div id="error-edit-<?php echo htmlspecialchars($table_name); ?>" class="alert alert-danger" style="display: none;"></div>
-    <form id="edit-form-<?php echo htmlspecialchars($table_name); ?>" onsubmit="submitEditForm('<?php echo htmlspecialchars($table_name); ?>')">
-        <?php if ($table_name === 'maintenance'): ?>
-            <input type="hidden" name="equipment_instance_name">
-            <input type="hidden" name="maintenance_number">
-        <?php elseif ($table_name === 'shipment_product'): ?>
-            <input type="hidden" name="shipment_number">
-            <input type="hidden" name="product_code">
-        <?php else: ?>
-            <input type="hidden" name="<?php echo htmlspecialchars($table_name . '_id'); ?>">
-        <?php endif; ?>
-        <?php foreach ($forms_fields[$table_name] as $field): ?>
-            <div class="mb-3">
-                <label for="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" class="form-label"><?php echo htmlspecialchars($field['label']); ?><?php echo $field['required'] ? ' *' : ''; ?></label>
-                <?php if ($field['name'] === 'is_new'): ?>
-                    <input type="checkbox" class="form-check-input" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" value="1">
-                <?php elseif ($field['name'] === 'master_full_name' && $table_name === 'maintenance'): ?>
-                    <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
-                        <option value="">Выберите мастера</option>
-                        <?php foreach ($masters as $master): ?>
-                            <option value="<?php echo htmlspecialchars($master['master_full_name']); ?>">
-                                <?php echo htmlspecialchars($master['master_full_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                <?php elseif ($field['name'] === 'employee_full_name' && ($table_name === 'shipping' || $table_name === 'equipment_instance')): ?>
-                    <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
-                        <option value="">Выберите сотрудника</option>
-                        <?php foreach ($employees as $employee): ?>
-                            <option value="<?php echo htmlspecialchars($employee['employee_full_name']); ?>">
-                                <?php echo htmlspecialchars($employee['employee_full_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                <?php elseif ($field['name'] === 'client_company_or_full_name' && $table_name === 'shipping'): ?>
-                    <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
-                        <option value="">Выберите клиента</option>
-                        <?php foreach ($clients as $client): ?>
-                            <option value="<?php echo htmlspecialchars($client['client_company_or_full_name']); ?>">
-                                <?php echo htmlspecialchars($client['client_company_or_full_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                <?php elseif ($field['name'] === 'supplier_company_or_full_name' && $table_name === 'supply'): ?>
-                    <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
-                        <option value="">Выберите поставщика</option>
-                        <?php foreach ($suppliers as $supplier): ?>
-                            <option value="<?php echo htmlspecialchars($supplier['supplier_company_or_full_name']); ?>">
-                                <?php echo htmlspecialchars($supplier['supplier_company_or_full_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                <?php elseif ($field['name'] === 'equipment_instance_name' && $table_name === 'maintenance'): ?>
-                    <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
-                        <option value="">Выберите оборудование</option>
-                        <?php foreach ($equipment_instances as $equipment): ?>
-                            <option value="<?php echo htmlspecialchars($equipment['equipment_instance_name']); ?>">
-                                <?php echo htmlspecialchars($equipment['equipment_instance_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                <?php else: ?>
-                    <input type="<?php echo htmlspecialchars($field['type']); ?>" class="form-control" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['type'] === 'number' && strpos($field['name'], 'price') !== false ? 'step="0.01"' : ''; ?> <?php echo $field['required'] ? 'required' : ''; ?> <?php echo in_array($field['name'], ['client_phone', 'employee_phone', 'master_phone', 'supplier_phone']) ? 'pattern="[\d+]{10,15}" title="Введите только цифры (10-15)"' : ''; ?>>
-                <?php endif; ?>
-            </div>
-        <?php endforeach; ?>
-        <button type="submit" class="btn btn-primary">Сохранить</button>
-        <button type="button" class="btn btn-secondary" onclick="hideEditForm('<?php echo htmlspecialchars($table_name); ?>')">Отмена</button>
-    </form>
-</div>
-                <?php endif; ?>
-                <table class="table table-bordered sortable" data-table-name="<?php echo htmlspecialchars($table_name); ?>">
-                    <thead>
-                        <tr>
-                            <?php foreach ($data[$table_name]['headers'] as $index => $header): ?>
-                                <?php 
-                                $field = array_keys($data[$table_name]['rows'][0] ?? [])[$index] ?? strtolower(str_replace(' ', '_', $header));
-                                $new_direction = ($sort_table === $table_name && $sort_field === $field && $sort_direction === 'ASC') ? 'DESC' : 'ASC';
-                                $icon = ($sort_table === $table_name && $sort_field === $field) ? ($sort_direction === 'ASC' ? '↑' : '↓') : '↕';
-                                ?>
-                                <th class="sort-header" data-sort="<?php echo htmlspecialchars($field); ?>" data-sort-type="<?php echo htmlspecialchars(in_array($field, ['client_id', 'employee_id', 'master_id', 'equipment_instance_code', 'maintenance_number', 'product_code', 'shipment_number', 'supply_number', 'supplier_id', 'shipment_product_quantity', 'shipment_product_price']) ? 'number' : (in_array($field, ['shipping_date', 'maintenance_date']) ? 'date' : 'string')); ?>">
-                                    <a href="?table=<?php echo htmlspecialchars($table_name); ?>&sort=<?php echo htmlspecialchars($field); ?>&direction=<?php echo htmlspecialchars($new_direction); ?>" class="sort-link">
-                                        <?php echo htmlspecialchars($header); ?>
-                                        <span class="sort-icon"><?php echo $icon; ?></span>
-                                    </a>
-                                </th>
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+                </div>
+            <?php endif; ?>
+
+            <?php foreach ($allowed_tables[$role] as $table_name): ?>
+                <section class="table-section mt-4" id="table-<?= htmlspecialchars($table_name) ?>" style="display: none;">
+                    <h2><?php echo htmlspecialchars(ucfirst($table_name)); ?></h2>
+                    <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'employee', 'maintenance', 'product', 'shipping', 'supply', 'supplier', 'shipment_product']))): ?>
+                        <button type="button" class="btn btn-primary mb-2" onclick="showAddForm('<?php echo htmlspecialchars($table_name); ?>')">Добавить запись</button>
+                        <form id="add-form-<?php echo htmlspecialchars($table_name); ?>" class="add-form" style="display: none;" onsubmit="addRecord('<?php echo htmlspecialchars($table_name); ?>', event)">
+                            <div id="error-add-<?php echo htmlspecialchars($table_name); ?>" class="alert alert-danger" style="display: none;"></div>
+                            <?php foreach ($forms_fields[$table_name] as $field): ?>
+                                <div class="mb-3">
+                                    <label for="<?php echo htmlspecialchars($field['name']); ?>-add-<?php echo htmlspecialchars($table_name); ?>" class="form-label"><?php echo htmlspecialchars($field['label']); ?><?php echo $field['required'] ? ' *' : ''; ?></label>
+                                    <input type="<?php echo htmlspecialchars($field['type']); ?>" class="form-control" id="<?php echo htmlspecialchars($field['name']); ?>-add-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?> <?php echo $field['name'] === 'client_phone' ? 'pattern="\d{10,15}" title="Введите только цифры (10-15)"' : ''; ?>>
+                                </div>
                             <?php endforeach; ?>
-                            <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'employee', 'maintenance', 'product', 'shipping', 'supply', 'supplier', 'shipment_product']))): ?>
-                                <th>Действия</th>
-                            <?php endif; ?>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($data[$table_name]['rows'] as $row): ?>
-                            <tr>
-                                <?php foreach ($row as $col): ?>
-                                    <td><?php echo htmlspecialchars($col ?? ''); ?></td>
-                                <?php endforeach; ?>
-                                <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'employee', 'maintenance', 'product', 'shipping', 'supply', 'supplier', 'shipment_product']))): ?>
-                                    <td>
-                                        <button type="button" class="btn btn-warning btn-sm" onclick="showEditForm('<?php echo htmlspecialchars($table_name); ?>', '<?php echo htmlspecialchars(json_encode($row, JSON_UNESCAPED_UNICODE)); ?>')">Редактировать</button>
-                                        <?php
-                                        $id = ($table_name === 'maintenance' ? $row['equipment_instance_code'] . '-' . $row['maintenance_number'] :
-                                              ($table_name === 'shipment_product' ? $row['shipment_number'] . '-' . $row['product_code'] :
-                                              $row[array_keys($row)[0]]));
-                                        ?>
-                                        <button type="button" class="btn btn-danger btn-sm" onclick="deleteRecord('<?php echo htmlspecialchars($table_name); ?>', '<?php echo htmlspecialchars($id); ?>')">Удалить</button>
-                                    </td>
+                            <button type="submit" class="btn btn-success">Сохранить</button>
+                            <button type="button" class="btn btn-secondary" onclick="hideAddForm('<?php echo htmlspecialchars($table_name); ?>')">Отмена</button>
+                        </form>
+                        <!-- Форма редактирования -->
+                        <div id="edit-form-<?php echo htmlspecialchars($table_name); ?>" class="edit-form" style="display: none;">
+                            <h3>Редактировать <?php echo htmlspecialchars(ucfirst($table_name)); ?></h3>
+                            <div id="error-edit-<?php echo htmlspecialchars($table_name); ?>" class="alert alert-danger" style="display: none;"></div>
+                            <form id="edit-form-<?php echo htmlspecialchars($table_name); ?>" onsubmit="submitEditForm('<?php echo htmlspecialchars($table_name); ?>')">
+                                <?php if ($table_name === 'maintenance'): ?>
+                                    <input type="hidden" name="equipment_instance_name">
+                                    <input type="hidden" name="maintenance_number">
+                                <?php elseif ($table_name === 'shipment_product'): ?>
+                                    <input type="hidden" name="shipment_number">
+                                    <input type="hidden" name="product_code">
+                                <?php else: ?>
+                                    <input type="hidden" name="<?php echo htmlspecialchars($table_name . '_id'); ?>">
                                 <?php endif; ?>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </section>
-        <?php endforeach; ?>
+                                <?php foreach ($forms_fields[$table_name] as $field): ?>
+                                    <div class="mb-3">
+                                        <label for="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" class="form-label"><?php echo htmlspecialchars($field['label']); ?><?php echo $field['required'] ? ' *' : ''; ?></label>
+                                        <?php if ($field['name'] === 'is_new'): ?>
+                                            <input type="checkbox" class="form-check-input" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" value="1">
+                                        <?php elseif ($field['name'] === 'master_full_name' && $table_name === 'maintenance'): ?>
+                                            <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
+                                                <option value="">Выберите мастера</option>
+                                                <?php foreach ($masters as $master): ?>
+                                                    <option value="<?php echo htmlspecialchars($master['master_full_name']); ?>">
+                                                        <?php echo htmlspecialchars($master['master_full_name']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        <?php elseif ($field['name'] === 'employee_full_name' && ($table_name === 'shipping' || $table_name === 'equipment_instance')): ?>
+                                            <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
+                                                <option value="">Выберите сотрудника</option>
+                                                <?php foreach ($employees as $employee): ?>
+                                                    <option value="<?php echo htmlspecialchars($employee['employee_full_name']); ?>">
+                                                        <?php echo htmlspecialchars($employee['employee_full_name']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        <?php elseif ($field['name'] === 'client_company_or_full_name' && $table_name === 'shipping'): ?>
+                                            <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
+                                                <option value="">Выберите клиента</option>
+                                                <?php foreach ($clients as $client): ?>
+                                                    <option value="<?php echo htmlspecialchars($client['client_company_or_full_name']); ?>">
+                                                        <?php echo htmlspecialchars($client['client_company_or_full_name']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        <?php elseif ($field['name'] === 'supplier_company_or_full_name' && $table_name === 'supply'): ?>
+                                            <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
+                                                <option value="">Выберите поставщика</option>
+                                                <?php foreach ($suppliers as $supplier): ?>
+                                                    <option value="<?php echo htmlspecialchars($supplier['supplier_company_or_full_name']); ?>">
+                                                        <?php echo htmlspecialchars($supplier['supplier_company_or_full_name']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        <?php elseif ($field['name'] === 'equipment_instance_name' && $table_name === 'maintenance'): ?>
+                                            <select class="form-select" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['required'] ? 'required' : ''; ?>>
+                                                <option value="">Выберите оборудование</option>
+                                                <?php foreach ($equipment_instances as $equipment): ?>
+                                                    <option value="<?php echo htmlspecialchars($equipment['equipment_instance_name']); ?>">
+                                                        <?php echo htmlspecialchars($equipment['equipment_instance_name']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        <?php else: ?>
+                                            <input type="<?php echo htmlspecialchars($field['type']); ?>" class="form-control" id="<?php echo htmlspecialchars($field['name']); ?>-edit-<?php echo htmlspecialchars($table_name); ?>" name="<?php echo htmlspecialchars($field['name']); ?>" <?php echo $field['type'] === 'number' && strpos($field['name'], 'price') !== false ? 'step="0.01"' : ''; ?> <?php echo $field['required'] ? 'required' : ''; ?> <?php echo in_array($field['name'], ['client_phone', 'employee_phone', 'master_phone', 'supplier_phone']) ? 'pattern="[\d+]{10,15}" title="Введите только цифры (10-15)"' : ''; ?>>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                                <button type="submit" class="btn btn-primary">Сохранить</button>
+                                <button type="button" class="btn btn-secondary" onclick="hideEditForm('<?php echo htmlspecialchars($table_name); ?>')">Отмена</button>
+                            </form>
+                        </div>
+                    <?php endif; ?>
+                    <div class="table-responsive">
+                        <table class="table table-bordered sortable" data-table-name="<?php echo htmlspecialchars($table_name); ?>">
+                            <thead>
+                                <tr>
+                                    <?php foreach ($data[$table_name]['headers'] as $index => $header): ?>
+                                        <?php 
+                                        $field = array_keys($data[$table_name]['rows'][0] ?? [])[$index] ?? strtolower(str_replace(' ', '_', $header));
+                                        $new_direction = ($sort_table === $table_name && $sort_field === $field && $sort_direction === 'ASC') ? 'DESC' : 'ASC';
+                                        $icon = ($sort_table === $table_name && $sort_field === $field) ? ($sort_direction === 'ASC' ? '↑' : '↓') : '↕';
+                                        ?>
+                                        <th class="sort-header" data-sort="<?php echo htmlspecialchars($field); ?>" data-sort-type="<?php echo htmlspecialchars(in_array($field, ['client_id', 'employee_id', 'master_id', 'equipment_instance_code', 'maintenance_number', 'product_code', 'shipment_number', 'supply_number', 'supplier_id', 'shipment_product_quantity', 'shipment_product_price']) ? 'number' : (in_array($field, ['shipping_date', 'maintenance_date']) ? 'date' : 'string')); ?>">
+                                            <a href="?table=<?php echo htmlspecialchars($table_name); ?>&sort=<?php echo htmlspecialchars($field); ?>&direction=<?php echo htmlspecialchars($new_direction); ?>" class="sort-link">
+                                                <?php echo htmlspecialchars($header); ?>
+                                                <span class="sort-icon"><?php echo $icon; ?></span>
+                                            </a>
+                                        </th>
+                                    <?php endforeach; ?>
+                                    <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'employee', 'maintenance', 'product', 'shipping', 'supply', 'supplier', 'shipment_product']))): ?>
+                                        <th>Действия</th>
+                                    <?php endif; ?>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($data[$table_name]['rows'] as $row): ?>
+                                    <tr>
+                                        <?php foreach ($row as $col): ?>
+                                            <td><?php echo htmlspecialchars($col ?? ''); ?></td>
+                                        <?php endforeach; ?>
+                                        <?php if ($role === 'admin' || ($role === 'accountant' && in_array($table_name, ['client', 'employee', 'maintenance', 'product', 'shipping', 'supply', 'supplier', 'shipment_product']))): ?>
+                                            <td>
+                                                <button type="button" class="btn btn-warning btn-sm" onclick="showEditForm('<?php echo htmlspecialchars($table_name); ?>', '<?php echo htmlspecialchars(json_encode($row, JSON_UNESCAPED_UNICODE)); ?>')">Редактировать</button>
+                                                <?php
+                                                $id = ($table_name === 'maintenance' ? $row['equipment_instance_code'] . '-' . $row['maintenance_number'] :
+                                                      ($table_name === 'shipment_product' ? $row['shipment_number'] . '-' . $row['product_code'] :
+                                                      $row[array_keys($row)[0]]));
+                                                ?>
+                                                <button type="button" class="btn btn-danger btn-sm" onclick="deleteRecord('<?php echo htmlspecialchars($table_name); ?>', '<?php echo htmlspecialchars($id); ?>')">Удалить</button>
+                                            </td>
+                                        <?php endif; ?>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            <?php endforeach; ?>
 
-        <?php if ($role === 'accountant'): ?>
-            <h3 class="mt-3">Добавить новую отгрузку</h3>
-            <form method="POST" class="mt-3">
-                <input type="hidden" name="add_shipping" value="1">
-                <div class="mb-3">
-                    <label for="shipment_number" class="form-label">Номер отгрузки</label>
-                    <input type="number" class="form-control" id="shipment_number" name="shipment_number" required>
-                </div>
-                <div class="mb-3">
-                    <label for="shipping_date" class="form-label">Дата отгрузки</label>
-                    <input type="date" class="form-control" id="shipping_date" name="shipping_date" required>
-                </div>
-                <div class="mb-3">
-                    <label for="shipment_status" class="form-label">Статус</label>
-                    <select class="form-select" id="shipment_status" name="shipment_status" required>
-                        <option value="">Выберите статус</option>
-                        <option value="В обработке">В обработке</option>
-                        <option value="Отправлено">Отправлено</option>
-                        <option value="Доставлено">Доставлено</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="employee_id" class="form-label">Сотрудник</label>
-                    <select class="form-select" id="employee_id" name="employee_id" required>
-                        <option value="">Выберите сотрудника</option>
-                        <?php foreach ($employees as $employee): ?>
-                            <option value="<?php echo htmlspecialchars($employee['employee_id']); ?>">
-                                <?php echo htmlspecialchars($employee['employee_full_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="client_id" class="form-label">Клиент</label>
-                    <select class="form-select" id="client_id" name="client_id" required>
-                        <option value="">Выберите клиента</option>
-                        <?php foreach ($clients as $client): ?>
-                            <option value="<?php echo htmlspecialchars($client['client_id']); ?>">
-                                <?php echo htmlspecialchars($client['client_company_or_full_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Добавить отгрузку</button>
-            </form>
-        <?php endif; ?>
+            <?php if ($role === 'accountant'): ?>
+                <h3 class="mt-3">Добавить новую отгрузку</h3>
+                <form method="POST" class="mt-3">
+                    <input type="hidden" name="add_shipping" value="1">
+                    <div class="mb-3">
+                        <label for="shipment_number" class="form-label">Номер отгрузки</label>
+                        <input type="number" class="form-control" id="shipment_number" name="shipment_number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="shipping_date" class="form-label">Дата отгрузки</label>
+                        <input type="date" class="form-control" id="shipping_date" name="shipping_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="shipment_status" class="form-label">Статус</label>
+                        <select class="form-select" id="shipment_status" name="shipment_status" required>
+                            <option value="">Выберите статус</option>
+                            <option value="В обработке">В обработке</option>
+                            <option value="Отправлено">Отправлено</option>
+                            <option value="Доставлено">Доставлено</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="employee_id" class="form-label">Сотрудник</label>
+                        <select class="form-select" id="employee_id" name="employee_id" required>
+                            <option value="">Выберите сотрудника</option>
+                            <?php foreach ($employees as $employee): ?>
+                                <option value="<?php echo htmlspecialchars($employee['employee_id']); ?>">
+                                    <?php echo htmlspecialchars($employee['employee_full_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="client_id" class="form-label">Клиент</label>
+                        <select class="form-select" id="client_id" name="client_id" required>
+                            <option value="">Выберите клиента</option>
+                            <?php foreach ($clients as $client): ?>
+                                <option value="<?php echo htmlspecialchars($client['client_id']); ?>">
+                                    <?php echo htmlspecialchars($client['client_company_or_full_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Добавить отгрузку</button>
+                </form>
+            <?php endif; ?>
 
-        <?php if ($role === 'employee'): ?>
-            <h3 class="mt-3">Добавить новое техобслуживание</h3>
-            <form method="POST" class="mt-3">
-                <input type="hidden" name="add_maintenance" value="1">
-                <div class="mb-3">
-                    <label for="equipment_instance_code" class="form-label">Код оборудования</label>
-                    <select class="form-select" id="equipment_instance_code" name="equipment_instance_code" required>
-                        <option value="">Выберите оборудование</option>
-                        <?php foreach ($equipment_instances as $equipment): ?>
-                            <option value="<?php echo htmlspecialchars($equipment['equipment_instance_code']); ?>">
-                                <?php echo htmlspecialchars($equipment['equipment_instance_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="maintenance_number" class="form-label">Номер обслуживания</label>
-                    <input type="number" class="form-control" id="maintenance_number" name="maintenance_number" required>
-                </div>
-                <div class="mb-3">
-                    <label for="master_id" class="form-label">Мастер</label>
-                    <select class="form-select" id="master_id" name="master_id" required>
-                        <option value="">Выберите мастера</option>
-                        <?php foreach ($masters as $master): ?>
-                            <option value="<?php echo htmlspecialchars($master['master_id']); ?>">
-                                <?php echo htmlspecialchars($master['master_full_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="maintenance_price" class="form-label">Цена</label>
-                    <input type="number" step="0.01" min="0" class="form-control" id="maintenance_price" name="maintenance_price" required>
-                </div>
-                <div class="mb-3">
-                    <label for="maintenance_status" class="form-label">Статус</label>
-                    <select class="form-select" id="maintenance_status" name="maintenance_status" required>
-                        <option value="">Выберите статус</option>
-                        <option value="Запланировано">Запланировано</option>
-                        <option value="В процессе">В процессе</option>
-                        <option value="Завершено">Завершено</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label for="maintenance_date" class="form-label">Дата обслуживания</label>
-                    <input type="date" class="form-control" id="maintenance_date" name="maintenance_date" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Добавить техобслуживание</button>
-            </form>
-        <?php endif; ?>
-    </main>
+            <?php if ($role === 'employee'): ?>
+                <h3 class="mt-3">Добавить новое техобслуживание</h3>
+                <form method="POST" class="mt-3">
+                    <input type="hidden" name="add_maintenance" value="1">
+                    <div class="mb-3">
+                        <label for="equipment_instance_code" class="form-label">Код оборудования</label>
+                        <select class="form-select" id="equipment_instance_code" name="equipment_instance_code" required>
+                            <option value="">Выберите оборудование</option>
+                            <?php foreach ($equipment_instances as $equipment): ?>
+                                <option value="<?php echo htmlspecialchars($equipment['equipment_instance_code']); ?>">
+                                    <?php echo htmlspecialchars($equipment['equipment_instance_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maintenance_number" class="form-label">Номер обслуживания</label>
+                        <input type="number" class="form-control" id="maintenance_number" name="maintenance_number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="master_id" class="form-label">Мастер</label>
+                        <select class="form-select" id="master_id" name="master_id" required>
+                            <option value="">Выберите мастера</option>
+                            <?php foreach ($masters as $master): ?>
+                                <option value="<?php echo htmlspecialchars($master['master_id']); ?>">
+                                    <?php echo htmlspecialchars($master['master_full_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maintenance_price" class="form-label">Цена</label>
+                        <input type="number" step="0.01" min="0" class="form-control" id="maintenance_price" name="maintenance_price" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maintenance_status" class="form-label">Статус</label>
+                        <select class="form-select" id="maintenance_status" name="maintenance_status" required>
+                            <option value="">Выберите статус</option>
+                            <option value="Запланировано">Запланировано</option>
+                            <option value="В процессе">В процессе</option>
+                            <option value="Завершено">Завершено</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maintenance_date" class="form-label">Дата обслуживания</label>
+                        <input type="date" class="form-control" id="maintenance_date" name="maintenance_date" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Добавить техобслуживание</button>
+                </form>
+            <?php endif; ?>
+        </main>
+    </div>
 
     <script src="script.js"></script>
     <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const links = document.querySelectorAll('.table-link');
-    const sections = document.querySelectorAll('.table-section');
+    document.addEventListener('DOMContentLoaded', function () {
+        const links = document.querySelectorAll('.table-link');
+        const sections = document.querySelectorAll('.table-section');
+        const sidebar = document.querySelector('#sidebar');
+        const toggleButton = document.querySelector('#toggle-sidebar');
 
-    function showTable(name) {
-        sections.forEach(sec => {
-            sec.style.display = (sec.id === 'table-' + name) ? 'block' : 'none';
+        function showTable(name) {
+            sections.forEach(sec => {
+                sec.style.display = (sec.id === 'table-' + name) ? 'block' : 'none';
+            });
+            links.forEach(l => l.classList.toggle('active', l.dataset.table === name));
+        }
+
+        if (links.length) showTable(links[0].dataset.table);
+
+        links.forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                showTable(link.dataset.table);
+            });
         });
-        // подсветка активной ссылки
-        links.forEach(l => l.classList.toggle('active', l.dataset.table === name));
-    }
 
-    // начальное отображение первой таблицы
-    if (links.length) showTable(links[0].dataset.table);
-
-    links.forEach(link => {
-        link.addEventListener('click', e => {
-            e.preventDefault();
-            showTable(link.dataset.table);
+        // Обработка сворачивания/разворачивания бокового меню
+        toggleButton.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            toggleButton.textContent = sidebar.classList.contains('collapsed') ? '☰' : '✕';
         });
     });
-});
-</script>
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -1,6 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Script.js: DOMContentLoaded fired');
 
+    // === Управление боковым меню ===
+    const sidebar = document.querySelector('#sidebar');
+    const toggleButton = document.querySelector('#toggle-sidebar');
+
+    // Восстанавливаем состояние бокового меню из localStorage
+    const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    if (isCollapsed && sidebar && toggleButton) {
+        sidebar.classList.add('collapsed');
+        toggleButton.textContent = '☰';
+        console.log('Sidebar: Restored collapsed state');
+    }
+
+    // Обработчик кнопки сворачивания/разворачивания
+    if (toggleButton) {
+        toggleButton.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            toggleButton.textContent = sidebar.classList.contains('collapsed') ? '☰' : '✕';
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            console.log(`Sidebar: Toggled to ${sidebar.classList.contains('collapsed') ? 'collapsed' : 'expanded'}`);
+        });
+    } else {
+        console.error('Toggle button not found');
+    }
+
+    // === Функции для управления формами ===
     function showAddForm(tableName) {
         const form = document.getElementById(`add-form-${tableName}`);
         if (form) {
@@ -243,12 +268,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.submitEditForm = submitEditForm;
     window.deleteRecord = deleteRecord;
 
-    console.log('Script: Initialization complete');
-
-
     // === Переключение таблиц ===
     const menuLinks = document.querySelectorAll('.sidebar a[data-table]');
-    const sections  = document.querySelectorAll('.table-section');
+    const sections = document.querySelectorAll('.table-section');
 
     function showTable(table) {
         sections.forEach(sec => {
@@ -267,8 +289,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // при загрузке показываем первую таблицу
+    // При загрузке показываем первую таблицу
     if (menuLinks.length) {
         showTable(menuLinks[0].dataset.table);
     }
+
+    console.log('Script: Initialization complete');
 });
