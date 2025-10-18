@@ -31,6 +31,48 @@ if (!in_array($table, $allowed_tables[$role])) {
 $data = $_POST;
 unset($data['table']);
 
+if ($table === 'shipping') {
+    $stmt = $pdo->prepare('SELECT client_company_or_full_name FROM client WHERE client_id = ? AND is_deleted = 0');
+    $stmt->execute([$data['client_id']]);
+    $data['client_company_or_full_name'] = $stmt->fetchColumn();
+    if (!$data['client_company_or_full_name']) {
+        echo json_encode(['error' => 'Клиент с ID ' . $data['client_id'] . ' не найден']);
+        exit;
+    }
+}
+// АВТОЗАПОЛНЕНИЕ user_id ДЛЯ MASTER
+if ($table === 'master') {
+    $data['user_id'] = $_SESSION['user_id'];
+}
+
+if ($table === 'equipment_instance') {
+    $data['product_code'] = 1; // По умолчанию первый товар (ТФ300х200)
+    $stmt = $pdo->prepare('SELECT employee_full_name FROM employee WHERE employee_id = ? AND is_deleted = 0');
+    $stmt->execute([$data['employee_id']]);
+    $data['employee_full_name'] = $stmt->fetchColumn();
+    if (!$data['employee_full_name']) {
+        echo json_encode(['error' => 'Сотрудник с ID ' . $data['employee_id'] . ' не найден']);
+        exit;
+    }
+}
+if ($table === 'maintenance') {
+    $stmt = $pdo->prepare('SELECT equipment_instance_name FROM equipment_instance WHERE equipment_instance_code = ? AND is_deleted = 0');
+    $stmt->execute([$data['equipment_instance_code']]);
+    $data['equipment_instance_name'] = $stmt->fetchColumn();
+    if (!$data['equipment_instance_name']) {
+        echo json_encode(['error' => 'Оборудование с кодом ' . $data['equipment_instance_code'] . ' не найдено']);
+        exit;
+    }
+}
+if ($table === 'supply') {
+    $stmt = $pdo->prepare('SELECT supplier_company_or_full_name FROM supplier WHERE supplier_id = ? AND is_deleted = 0');
+    $stmt->execute([$data['supplier_id']]);
+    $data['supplier_company_or_full_name'] = $stmt->fetchColumn();
+    if (!$data['supplier_company_or_full_name']) {
+        echo json_encode(['error' => 'Поставщик с ID ' . $data['supplier_id'] . ' не найден']);
+        exit;
+    }
+}
 // Проверка уникальности идентификаторов
 try {
     switch ($table) {
