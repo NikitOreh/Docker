@@ -55,6 +55,24 @@ if ($table === 'equipment_instance') {
         exit;
     }
 }
+
+// // АВТОЗАПОЛНЕНИЕ equipment_instance_name ДЛЯ MAINTENANCE
+// if ($table === 'maintenance') {
+//     $stmt = $pdo->prepare('SELECT equipment_instance_name 
+//                            FROM equipment_instance 
+//                            WHERE equipment_instance_code = ? AND is_deleted = 0');
+//     $stmt->execute([$data['equipment_instance_code']]);
+//     $name = $stmt->fetchColumn();
+
+//     if ($name === false || $name === null) {
+//         echo json_encode(['error' => 'Оборудование с кодом ' . $data['equipment_instance_code'] . ' не найдено']);
+//         exit;
+//     }
+
+//     $data['equipment_instance_name'] = $name;
+// }
+
+
 if ($table === 'maintenance') {
     $stmt = $pdo->prepare('SELECT equipment_instance_name FROM equipment_instance WHERE equipment_instance_code = ? AND is_deleted = 0');
     $stmt->execute([$data['equipment_instance_code']]);

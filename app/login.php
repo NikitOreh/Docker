@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Если роль - мастер, получаем master_id из таблицы masters
                 if ($user['role'] === 'master') {
-                    $stmt = $pdo->prepare('SELECT master_id FROM masters WHERE user_id = ?');
+                    $stmt = $pdo->prepare('SELECT master_id FROM master WHERE user_id = ?');
                     $stmt->execute([$user['user_id']]);
                     $master = $stmt->fetch(PDO::FETCH_ASSOC);
                     if ($master) {
